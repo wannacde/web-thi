@@ -27,5 +27,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 // Route cho bài thi
 Route::get('/exams/{id}', [ExamController::class, 'detailView'])->name('exam.detail');
+Route::get('/exams/{id}/result', [ExamController::class, 'resultView'])->name('exam.result');
 Route::post('/exams/{id}/submit', [ExamController::class, 'submitExam'])->name('exam.submit');
 
