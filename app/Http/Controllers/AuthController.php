@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-<<<<<<< HEAD
-=======
     public function showLoginForm()
     {
         return view('auth.login');
@@ -18,7 +16,6 @@ class AuthController extends Controller
     {
         return view('auth.register');
     }
->>>>>>> master
     // Đăng ký người dùng
     public function register(Request $request)
     {

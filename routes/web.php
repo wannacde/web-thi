@@ -13,11 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-<<<<<<< HEAD
-Route::get('/', function () {
-    return view('welcome');
-});
-=======
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExamController;
@@ -35,4 +30,3 @@ Route::get('/exams/{id}', [ExamController::class, 'detailView'])->name('exam.det
 Route::get('/exams/{id}/result', [ExamController::class, 'resultView'])->name('exam.result');
 Route::post('/exams/{id}/submit', [ExamController::class, 'submitExam'])->name('exam.submit');
 
->>>>>>> master
