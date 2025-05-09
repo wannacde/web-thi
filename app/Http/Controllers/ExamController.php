@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class ExamController extends Controller
 {
+<<<<<<< HEAD
+=======
+    public function detailView($id)
+    {
+        $exam = BaiThi::with('questions.options')->findOrFail($id);
+        return view('exams.detail', compact('exam'));
+    }
+>>>>>>> master
     // Tạo bài thi mới
     public function createExam(Request $request)
     {
@@ -69,6 +77,22 @@ class ExamController extends Controller
         $exam->delete();
         return response()->json(['message' => 'Bài thi đã được xóa thành công!'], 200);
     }
+<<<<<<< HEAD
+=======
+    public function submitExam(Request $request, $id)
+    {
+    $exam = BaiThi::with('questions.options')->findOrFail($id);
+    $score = 0;
+    foreach ($exam->questions as $question) {
+        if (isset($request->question[$question->id]) && $request->question[$question->id] == $question->options->where('is_correct', true)->first()->id) {
+            $score++;
+        }
+    }
+    // Lưu điểm hoặc xử lý kết quả
+    return redirect()->route('exam.list')->with('success', 'Bạn đã hoàn thành bài thi với điểm: ' . $score);
+    }
+
+>>>>>>> master
 }
 
 

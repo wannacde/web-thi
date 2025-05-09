@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+<<<<<<< HEAD
+=======
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
+    }
+>>>>>>> master
     // Đăng ký người dùng
     public function register(Request $request)
     {

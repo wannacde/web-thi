@@ -13,6 +13,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+<<<<<<< HEAD
 Route::get('/', function () {
     return view('welcome');
 });
+=======
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExamController;
+
+// Route cho đăng nhập
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.view');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+// Route cho đăng ký
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register.view');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+// Route cho bài thi
+Route::get('/exams/{id}', [ExamController::class, 'detailView'])->name('exam.detail');
+Route::get('/exams/{id}/result', [ExamController::class, 'resultView'])->name('exam.result');
+Route::post('/exams/{id}/submit', [ExamController::class, 'submitExam'])->name('exam.submit');
+
+>>>>>>> master
