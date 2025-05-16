@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,13 +10,19 @@ class TraLoiNguoiDung extends Model
     use HasFactory;
 
     protected $table = 'TraLoiNguoiDung';
-    public $timestamps = false; // Không cần timestamps cho bảng này
+    protected $primaryKey = null; // Không có khóa chính đơn
+    public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'ma_ket_qua',
         'ma_cau_hoi',
         'dap_an_chon',
         'dung_sai',
+    ];
+
+    protected $casts = [
+        'dung_sai' => 'boolean',
     ];
 
     public function ketQuaBaiThi()

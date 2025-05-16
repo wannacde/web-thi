@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\NguoiDung::class,
         ],
 
         // 'users' => [
@@ -97,6 +97,12 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+    ],
+    
+    'column_names' => [
+        'email' => 'email',
+        'username' => 'ten_dang_nhap',
+        'password' => 'mat_khau',
     ],
 
     /*

@@ -10,6 +10,7 @@ class BaiThi extends Model
 
     protected $table = 'BaiThi';
     protected $primaryKey = 'ma_bai_thi';
+    public $timestamps = false; // Tắt timestamps
 
     protected $fillable = [
         'ma_mon_hoc',
@@ -27,5 +28,10 @@ class BaiThi extends Model
     public function cauHoi()
     {
         return $this->belongsToMany(CauHoi::class, 'BaiThi_CauHoi', 'ma_bai_thi', 'ma_cau_hoi');
+    }
+    
+    public function nguoiTao()
+    {
+        return $this->belongsTo(NguoiDung::class, 'nguoi_tao');
     }
 }

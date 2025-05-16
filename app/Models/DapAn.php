@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,11 +11,16 @@ class DapAn extends Model
 
     protected $table = 'DapAn';
     protected $primaryKey = 'ma_dap_an';
+    public $timestamps = false;
 
     protected $fillable = [
         'ma_cau_hoi',
         'noi_dung',
         'dung_sai',
+    ];
+
+    protected $casts = [
+        'dung_sai' => 'boolean',
     ];
 
     public function cauHoi()

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +11,7 @@ class Chuong extends Model
 
     protected $table = 'Chuong';
     protected $primaryKey = 'ma_chuong';
+    public $timestamps = false;
 
     protected $fillable = [
         'ma_mon_hoc',
@@ -19,13 +21,13 @@ class Chuong extends Model
         'mo_ta',
     ];
 
-    public function cauHoi()
-    {
-        return $this->hasMany(CauHoi::class, 'ma_chuong');
-    }
-
     public function monHoc()
     {
         return $this->belongsTo(MonHoc::class, 'ma_mon_hoc');
+    }
+
+    public function cauHoi()
+    {
+        return $this->hasMany(CauHoi::class, 'ma_chuong');
     }
 }

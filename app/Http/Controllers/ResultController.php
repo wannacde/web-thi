@@ -1,64 +1,150 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\KetQuaBaiThi;
 use App\Models\TraLoiNguoiDung;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ResultController extends Controller
 {
-    // Lưu kết quả bài thi
-    public function saveResult(Request $request)
+    /**
+     * Hiển thị danh sách kết quả bài thi
+     */
+    public function index()
     {
-        $request->validate([
-            'ma_bai_thi' => 'required|exists:BaiThi,ma_bai_thi',
-            'ma_nguoi_dung' => 'required|exists:NguoiDung,ma_nguoi_dung',
-            'diem' => 'required|numeric',
-            'tra_lois' => 'required|array',
-        ]);
-
-        // Tạo kết quả bài thi
-        $result = KetQuaBaiThi::create([
-            'ma_bai_thi' => $request->ma_bai_thi,
-            'ma_nguoi_dung' => $request->ma_nguoi_dung,
-            'diem' => $request->diem,
-        ]);
-
-        // Lưu các câu trả lời của người dùng
-        foreach ($request->tra_lois as $tra_loi) {
-            TraLoiNguoiDung::create([
-                'ma_ket_qua' => $result->ma_ket_qua,
-                'ma_cau_hoi' => $tra_loi['ma_cau_hoi'],
-                'dap_an_chon' => $tra_loi['dap_an_chon'],
-                'dung_sai' => $tra_loi['dung_sai'],
-            ]);
+        $user = Auth::user();
+        
+        // Nếu là học sinh, chỉ hiển thị kết quả của họ
+        if ($user->vai_tro == 'hoc_sinh') {
+            $results = KetQuaBaiThi::where('ma_nguoi_dung', $user->ma_nguoi_dung)
+                ->with(['baiThi.monHoc', 'nguoiDung'])
+                ->orderBy('ngay_nop', 'desc')
+                ->paginate(10);
+        } 
+        // Nếu là giáo viên, hiển thị kết quả của bài thi do họ tạo
+        elseif ($user->vai_tro == 'giao_vien') {
+            $results = KetQuaBaiThi::whereHas('baiThi', function($query) use ($user) {
+                    $query->where('nguoi_tao', $user->ma_nguoi_dung);
+                })
+                ->with(['baiThi.monHoc', 'nguoiDung'])
+                ->orderBy('ngay_nop', 'desc')
+                ->paginate(10);
+        } 
+        // Nếu là admin, hiển thị tất cả kết quả
+        else {
+            $results = KetQuaBaiThi::with(['baiThi.monHoc', 'nguoiDung'])
+                ->orderBy('ngay_nop', 'desc')
+                ->paginate(10);
         }
-
-        return response()->json(['message' => 'Kết quả bài thi đã được lưu thành công!', 'result' => $result], 201);
+        
+        return view('results.index', compact('results'));
     }
 
-    // Lấy kết quả bài thi của người dùng
-    public function getResults($ma_nguoi_dung)
+    /**
+     * Hiển thị chi tiết kết quả bài thi
+     */
+    public function show($id)
     {
-        $results = KetQuaBaiThi::with(['baiThi', 'traLoiNguoiDung'])
-            ->where('ma_nguoi_dung', $ma_nguoi_dung)
-            ->get();
-
-        if ($results->isEmpty()) {
-            return response()->json(['message' => 'Không tìm thấy kết quả nào cho người dùng này.'], 404);
+        $result = KetQuaBaiThi::with([
+            'baiThi.monHoc', 
+            'nguoiDung',
+            'traLoi.cauHoi.dapAn'
+        ])->findOrFail($id);
+        
+        $user = Auth::user();
+        
+        // Kiểm tra quyền xem kết quả
+        if ($user->vai_tro == 'hoc_sinh' && $result->ma_nguoi_dung != $user->ma_nguoi_dung) {
+            return redirect()->route('results.index')->with('error', 'Bạn không có quyền xem kết quả này!');
         }
-
-        return response()->json($results, 200);
+        
+        if ($user->vai_tro == 'giao_vien' && $result->baiThi->nguoi_tao != $user->ma_nguoi_dung) {
+            return redirect()->route('results.index')->with('error', 'Bạn không có quyền xem kết quả này!');
+        }
+        
+        // Tính toán thống kê
+        $totalQuestions = $result->traLoi->count();
+        $correctAnswers = $result->traLoi->where('dung_sai', 1)->count();
+        $wrongAnswers = $totalQuestions - $correctAnswers;
+        $percentCorrect = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100, 2) : 0;
+        
+        return view('results.show', compact('result', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'percentCorrect'));
     }
 
-    // Lấy kết quả bài thi theo ID
-    public function getResult($id)
+    /**
+     * Xuất kết quả bài thi dưới dạng PDF
+     */
+    public function exportPdf($id)
     {
-        $result = KetQuaBaiThi::with(['baiThi', 'traLoiNguoiDung'])->find($id);
-        if (!$result) {
-            return response()->json(['message' => 'Kết quả bài thi không tồn tại!'], 404);
+        $result = KetQuaBaiThi::with([
+            'baiThi.monHoc', 
+            'nguoiDung',
+            'traLoi.cauHoi.dapAn'
+        ])->findOrFail($id);
+        
+        $user = Auth::user();
+        
+        // Kiểm tra quyền xuất kết quả
+        if ($user->vai_tro == 'hoc_sinh' && $result->ma_nguoi_dung != $user->ma_nguoi_dung) {
+            return redirect()->route('results.index')->with('error', 'Bạn không có quyền xuất kết quả này!');
         }
-        return response()->json($result, 200);
+        
+        if ($user->vai_tro == 'giao_vien' && $result->baiThi->nguoi_tao != $user->ma_nguoi_dung) {
+            return redirect()->route('results.index')->with('error', 'Bạn không có quyền xuất kết quả này!');
+        }
+        
+        // Tính toán thống kê
+        $totalQuestions = $result->traLoi->count();
+        $correctAnswers = $result->traLoi->where('dung_sai', 1)->count();
+        $wrongAnswers = $totalQuestions - $correctAnswers;
+        $percentCorrect = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100, 2) : 0;
+        
+        $pdf = Pdf::loadView('results.pdf', compact('result', 'totalQuestions', 'correctAnswers', 'wrongAnswers', 'percentCorrect'));
+        
+        return $pdf->download('ket-qua-bai-thi-' . $result->ma_ket_qua . '.pdf');
+    }
+    
+    /**
+     * Hiển thị thống kê kết quả bài thi
+     */
+    public function statistics()
+    {
+        // Chỉ admin và giáo viên mới có quyền xem thống kê
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        $user = Auth::user();
+        
+        // Nếu là giáo viên, chỉ thống kê bài thi của họ
+        if ($user->vai_tro == 'giao_vien') {
+            $examStats = \DB::table('BaiThi')
+                ->select('BaiThi.ma_bai_thi', 'BaiThi.ten_bai_thi', 
+                    \DB::raw('COUNT(KetQuaBaiThi.ma_ket_qua) as total_attempts'),
+                    \DB::raw('AVG(KetQuaBaiThi.diem) as average_score'),
+                    \DB::raw('MAX(KetQuaBaiThi.diem) as highest_score'),
+                    \DB::raw('MIN(KetQuaBaiThi.diem) as lowest_score'))
+                ->leftJoin('KetQuaBaiThi', 'BaiThi.ma_bai_thi', '=', 'KetQuaBaiThi.ma_bai_thi')
+                ->where('BaiThi.nguoi_tao', $user->ma_nguoi_dung)
+                ->groupBy('BaiThi.ma_bai_thi', 'BaiThi.ten_bai_thi')
+                ->get();
+        } 
+        // Nếu là admin, thống kê tất cả bài thi
+        else {
+            $examStats = \DB::table('BaiThi')
+                ->select('BaiThi.ma_bai_thi', 'BaiThi.ten_bai_thi', 
+                    \DB::raw('COUNT(KetQuaBaiThi.ma_ket_qua) as total_attempts'),
+                    \DB::raw('AVG(KetQuaBaiThi.diem) as average_score'),
+                    \DB::raw('MAX(KetQuaBaiThi.diem) as highest_score'),
+                    \DB::raw('MIN(KetQuaBaiThi.diem) as lowest_score'))
+                ->leftJoin('KetQuaBaiThi', 'BaiThi.ma_bai_thi', '=', 'KetQuaBaiThi.ma_bai_thi')
+                ->groupBy('BaiThi.ma_bai_thi', 'BaiThi.ten_bai_thi')
+                ->get();
+        }
+        
+        return view('results.statistics', compact('examStats'));
     }
 }
-

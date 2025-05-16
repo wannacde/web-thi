@@ -11,6 +11,7 @@ class MonHoc extends Model
 
     protected $table = 'MonHoc';
     protected $primaryKey = 'ma_mon_hoc';
+    public $timestamps = false;
 
     protected $fillable = [
         'ten_mon_hoc',

@@ -1,71 +1,262 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\CauHoi;
+use App\Models\Chuong;
+use App\Models\DapAn;
+use App\Models\MonHoc;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
-    // Tạo câu hỏi mới
-    public function createQuestion(Request $request)
+    /**
+     * Hiển thị danh sách câu hỏi
+     */
+    public function index()
     {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        // Nếu là giáo viên, chỉ hiển thị câu hỏi của họ
+        if (Auth::user()->vai_tro == 'giao_vien') {
+            $questions = CauHoi::where('nguoi_tao', Auth::id())
+                ->with(['chuong.monHoc', 'dapAn'])
+                ->paginate(10);
+        } else {
+            // Nếu là admin, hiển thị tất cả câu hỏi
+            $questions = CauHoi::with(['chuong.monHoc', 'dapAn'])->paginate(10);
+        }
+        
+        return view('questions.index', compact('questions'));
+    }
+
+    /**
+     * Hiển thị form tạo câu hỏi mới
+     */
+    public function create()
+    {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        $monHocs = MonHoc::all();
+        $chuongs = Chuong::all();
+        
+        return view('questions.create', compact('monHocs', 'chuongs'));
+    }
+
+    /**
+     * Lưu câu hỏi mới
+     */
+    public function store(Request $request)
+    {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
         $request->validate([
             'ma_chuong' => 'required|exists:Chuong,ma_chuong',
             'noi_dung' => 'required|string',
             'loai_cau_hoi' => 'required|in:trac_nghiem,dien_khuyet',
-            'nguoi_tao' => 'required|exists:NguoiDung,ma_nguoi_dung',
+            'dap_an' => 'required|array|min:1',
+            'dap_an.*.noi_dung' => 'required|string',
+            'dap_an.*.dung_sai' => 'required|boolean',
         ]);
-
-        $question = CauHoi::create($request->all());
-
-        return response()->json(['message' => 'Câu hỏi đã được tạo thành công!', 'question' => $question], 201);
-    }
-
-    // Lấy danh sách câu hỏi
-    public function getQuestions()
-    {
-        $questions = CauHoi::with('chuong')->get();
-        return response()->json($questions, 200);
-    }
-
-    // Lấy thông tin câu hỏi theo ID
-    public function getQuestion($id)
-    {
-        $question = CauHoi::with('chuong')->find($id);
-        if (!$question) {
-            return response()->json(['message' => 'Câu hỏi không tồn tại!'], 404);
+        
+        // Bắt đầu transaction
+        DB::beginTransaction();
+        
+        try {
+            // Tạo câu hỏi
+            $question = CauHoi::create([
+                'ma_chuong' => $request->ma_chuong,
+                'noi_dung' => $request->noi_dung,
+                'loai_cau_hoi' => $request->loai_cau_hoi,
+                'nguoi_tao' => Auth::id(),
+            ]);
+            
+            // Tạo đáp án
+            foreach ($request->dap_an as $answer) {
+                DapAn::create([
+                    'ma_cau_hoi' => $question->ma_cau_hoi,
+                    'noi_dung' => $answer['noi_dung'],
+                    'dung_sai' => $answer['dung_sai'],
+                ]);
+            }
+            
+            DB::commit();
+            return redirect()->route('questions.index')->with('success', 'Câu hỏi đã được tạo thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())->withInput();
         }
-        return response()->json($question, 200);
     }
 
-    // Cập nhật câu hỏi
-    public function updateQuestion(Request $request, $id)
+    /**
+     * Hiển thị chi tiết câu hỏi
+     */
+    public function show($id)
     {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        $question = CauHoi::with(['chuong.monHoc', 'dapAn'])->findOrFail($id);
+        
+        // Nếu là giáo viên, chỉ cho phép xem câu hỏi của họ
+        if (Auth::user()->vai_tro == 'giao_vien' && $question->nguoi_tao != Auth::id()) {
+            return redirect()->route('questions.index')->with('error', 'Bạn không có quyền xem câu hỏi này!');
+        }
+        
+        return view('questions.show', compact('question'));
+    }
+
+    /**
+     * Hiển thị form chỉnh sửa câu hỏi
+     */
+    public function edit($id)
+    {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        $question = CauHoi::with('dapAn')->findOrFail($id);
+        
+        // Nếu là giáo viên, chỉ cho phép chỉnh sửa câu hỏi của họ
+        if (Auth::user()->vai_tro == 'giao_vien' && $question->nguoi_tao != Auth::id()) {
+            return redirect()->route('questions.index')->with('error', 'Bạn không có quyền chỉnh sửa câu hỏi này!');
+        }
+        
+        $monHocs = MonHoc::all();
+        $chuongs = Chuong::all();
+        
+        return view('questions.edit', compact('question', 'monHocs', 'chuongs'));
+    }
+
+    /**
+     * Cập nhật câu hỏi
+     */
+    public function update(Request $request, $id)
+    {
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
+        }
+        
+        $question = CauHoi::findOrFail($id);
+        
+        // Nếu là giáo viên, chỉ cho phép chỉnh sửa câu hỏi của họ
+        if (Auth::user()->vai_tro == 'giao_vien' && $question->nguoi_tao != Auth::id()) {
+            return redirect()->route('questions.index')->with('error', 'Bạn không có quyền chỉnh sửa câu hỏi này!');
+        }
+        
         $request->validate([
-            'noi_dung' => 'sometimes|required|string',
-            'loai_cau_hoi' => 'sometimes|required|in:trac_nghiem,dien_khuyet',
-            'ma_chuong' => 'sometimes|required|exists:Chuong,ma_chuong',
+            'ma_chuong' => 'required|exists:Chuong,ma_chuong',
+            'noi_dung' => 'required|string',
+            'loai_cau_hoi' => 'required|in:trac_nghiem,dien_khuyet',
+            'dap_an' => 'required|array|min:1',
+            'dap_an.*.noi_dung' => 'required|string',
+            'dap_an.*.dung_sai' => 'required|boolean',
         ]);
-
-        $question = CauHoi::find($id);
-        if (!$question) {
-            return response()->json(['message' => 'Câu hỏi không tồn tại!'], 404);
+        
+        // Bắt đầu transaction
+        DB::beginTransaction();
+        
+        try {
+            // Cập nhật câu hỏi
+            $question->update([
+                'ma_chuong' => $request->ma_chuong,
+                'noi_dung' => $request->noi_dung,
+                'loai_cau_hoi' => $request->loai_cau_hoi,
+            ]);
+            
+            // Xóa đáp án cũ
+            DapAn::where('ma_cau_hoi', $id)->delete();
+            
+            // Tạo đáp án mới
+            foreach ($request->dap_an as $answer) {
+                DapAn::create([
+                    'ma_cau_hoi' => $question->ma_cau_hoi,
+                    'noi_dung' => $answer['noi_dung'],
+                    'dung_sai' => $answer['dung_sai'],
+                ]);
+            }
+            
+            DB::commit();
+            return redirect()->route('questions.index')->with('success', 'Câu hỏi đã được cập nhật thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())->withInput();
         }
-
-        $question->update($request->all());
-        return response()->json(['message' => 'Câu hỏi đã được cập nhật thành công!', 'question' => $question], 200);
     }
 
-    // Xóa câu hỏi
-    public function deleteQuestion($id)
+    /**
+     * Xóa câu hỏi
+     */
+    public function destroy($id)
     {
-        $question = CauHoi::find($id);
-        if (!$question) {
-            return response()->json(['message' => 'Câu hỏi không tồn tại!'], 404);
+        // Kiểm tra quyền truy cập
+        if (Auth::user()->vai_tro == 'hoc_sinh') {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
         }
-
-        $question->delete();
-        return response()->json(['message' => 'Câu hỏi đã được xóa thành công!'], 200);
+        
+        $question = CauHoi::findOrFail($id);
+        
+        // Nếu là giáo viên, chỉ cho phép xóa câu hỏi của họ
+        if (Auth::user()->vai_tro == 'giao_vien' && $question->nguoi_tao != Auth::id()) {
+            return redirect()->route('questions.index')->with('error', 'Bạn không có quyền xóa câu hỏi này!');
+        }
+        
+        // Kiểm tra xem câu hỏi có đang được sử dụng trong bài thi nào không
+        $isUsed = DB::table('BaiThi_CauHoi')->where('ma_cau_hoi', $id)->exists();
+        if ($isUsed) {
+            return redirect()->route('questions.index')->with('error', 'Không thể xóa câu hỏi đang được sử dụng trong bài thi!');
+        }
+        
+        // Bắt đầu transaction
+        DB::beginTransaction();
+        
+        try {
+            // Xóa đáp án
+            DapAn::where('ma_cau_hoi', $id)->delete();
+            
+            // Xóa câu hỏi
+            $question->delete();
+            
+            DB::commit();
+            return redirect()->route('questions.index')->with('success', 'Câu hỏi đã được xóa thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Lấy danh sách chương theo môn học
+     */
+    public function getChuongsByMonHoc($maMonHoc)
+    {
+        $chuongs = Chuong::where('ma_mon_hoc', $maMonHoc)->get();
+        return response()->json($chuongs);
+    }
+    
+    /**
+     * Lấy danh sách câu hỏi theo chương
+     */
+    public function getQuestionsByChuong($maChuong)
+    {
+        $questions = CauHoi::where('ma_chuong', $maChuong)
+            ->with('dapAn')
+            ->get();
+        return response()->json($questions);
     }
 }
-

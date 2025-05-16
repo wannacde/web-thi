@@ -10,6 +10,7 @@ class CauHoi extends Model
 
     protected $table = 'CauHoi';
     protected $primaryKey = 'ma_cau_hoi';
+    public $timestamps = false; // Tắt timestamps
 
     protected $fillable = [
         'ma_chuong',
@@ -28,4 +29,3 @@ class CauHoi extends Model
         return $this->belongsTo(Chuong::class, 'ma_chuong');
     }
 }
-

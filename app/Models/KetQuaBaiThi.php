@@ -10,11 +10,17 @@ class KetQuaBaiThi extends Model
 
     protected $table = 'KetQuaBaiThi';
     protected $primaryKey = 'ma_ket_qua';
+    public $timestamps = false; // Tắt timestamps
 
     protected $fillable = [
         'ma_bai_thi',
         'ma_nguoi_dung',
         'diem',
+        'ngay_nop',
+    ];
+
+    protected $casts = [
+        'ngay_nop' => 'datetime',
     ];
 
     public function baiThi()
@@ -27,7 +33,7 @@ class KetQuaBaiThi extends Model
         return $this->belongsTo(NguoiDung::class, 'ma_nguoi_dung');
     }
 
-    public function traLoiNguoiDung()
+    public function traLoi()
     {
         return $this->hasMany(TraLoiNguoiDung::class, 'ma_ket_qua');
     }

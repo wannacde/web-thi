@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@yield('title') - Online Exam</title>
+    <title>@yield('title') - Hệ thống thi trực tuyến</title>
     <style>
         /* Reset & basic */
         body, html {
@@ -28,7 +28,7 @@
             font-size: 1.25rem; font-weight: bold;
         }
         .container {
-            max-width: 960px; margin: 2rem auto; background: white;
+            max-width: 1200px; margin: 2rem auto; background: white;
             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
         }
         h1, h2 {
@@ -71,29 +71,85 @@
             background-color: #3490dc; color: white; border: none;
             padding: 0.5rem 1rem; border-radius: 4px;
             cursor: pointer; font-weight: 600;
+            display: inline-block;
         }
         .btn-primary:hover {
             background-color: #2779bd;
+            text-decoration: none;
         }
         .alert {
-            padding: 0.75rem 1rem; background-color: #48bb78; color: white;
-            border-radius: 4px; margin-bottom: 1rem;
+            padding: 0.75rem 1rem; margin-bottom: 1rem;
+            border-radius: 4px; 
+        }
+        .alert-success {
+            background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;
+        }
+        .alert-warning {
+            background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;
         }
     </style>
+    @yield('styles')
 </head>
 <body>
     <nav>
-        <a href="{{ url('/') }}">OnlineExam</a>
+        <a href="{{ url('/') }}">Hệ thống thi trực tuyến</a>
         <div>
             <a href="{{ route('exam.list') }}">Bài thi</a>
-            <a href="{{ route('login.view') }}">Đăng nhập</a>
-            <a href="{{ route('register.view') }}">Đăng ký</a>
+            @guest
+                <a href="{{ route('login.view') }}">Đăng nhập</a>
+                <a href="{{ route('register.view') }}">Đăng ký</a>
+            @else
+                @if(Auth::user()->vai_tro == 'quan_tri')
+                    <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+                @elseif(Auth::user()->vai_tro == 'giao_vien')
+                    <a href="{{ route('teacher.dashboard') }}">Dashboard</a>
+                @endif
+                <a href="{{ route('questions.index') }}">Câu hỏi</a>
+                <a href="{{ route('subjects.index') }}">Môn học</a>
+                <a href="{{ route('results.index') }}">Kết quả</a>
+                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit" style="background: none; border: none; color: white; cursor: pointer; font-weight: 600;">Đăng xuất ({{ Auth::user()->ho_ten }})</button>
+                </form>
+            @endguest
         </div>
     </nav>
 
     <div class="container">
+        <!-- Flash Messages -->
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if(session('info'))
+            <div class="alert alert-info">
+                {{ session('info') }}
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="alert alert-warning">
+                {{ session('warning') }}
+            </div>
+        @endif
+
         @yield('content')
     </div>
+    
+    @yield('scripts')
 </body>
 </html>
-

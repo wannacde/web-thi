@@ -5,6 +5,7 @@ use App\Models\NguoiDung;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -12,22 +13,24 @@ class AuthController extends Controller
     {
         return view('auth.login');
     }
+
     public function showRegistrationForm()
     {
         return view('auth.register');
     }
+
     // Đăng ký người dùng
     public function register(Request $request)
     {
         $request->validate([
             'ten_dang_nhap' => 'required|unique:NguoiDung',
-            'mat_khau' => 'required|min:6',
+            'mat_khau' => 'required|min:6|confirmed',
             'ho_ten' => 'required',
             'email' => 'required|email|unique:NguoiDung',
             'vai_tro' => 'required|in:quan_tri,giao_vien,hoc_sinh',
         ]);
 
-        NguoiDung::create([
+        $user = NguoiDung::create([
             'ten_dang_nhap' => $request->ten_dang_nhap,
             'mat_khau' => Hash::make($request->mat_khau),
             'ho_ten' => $request->ho_ten,
@@ -35,7 +38,10 @@ class AuthController extends Controller
             'vai_tro' => $request->vai_tro,
         ]);
 
-        return response()->json(['message' => 'Đăng ký thành công!'], 201);
+        // Đăng nhập người dùng sau khi đăng ký
+        Auth::login($user);
+
+        return redirect()->route('home')->with('success', 'Đăng ký thành công!');
     }
 
     // Đăng nhập người dùng
@@ -46,19 +52,37 @@ class AuthController extends Controller
             'mat_khau' => 'required',
         ]);
 
-        if (Auth::attempt(['ten_dang_nhap' => $request->ten_dang_nhap, 'mat_khau' => $request->mat_khau])) {
-            $user = Auth::user();
-            return response()->json(['message' => 'Đăng nhập thành công!', 'user' => $user], 200);
+        // Tìm người dùng theo tên đăng nhập
+        $user = NguoiDung::where('ten_dang_nhap', $request->ten_dang_nhap)->first();
+        
+        // Kiểm tra người dùng tồn tại và mật khẩu đúng
+        if ($user && Hash::check($request->mat_khau, $user->mat_khau)) {
+            Auth::login($user);
+            $request->session()->regenerate();
+            
+            // Chuyển hướng dựa trên vai trò
+            if ($user->vai_tro == 'quan_tri') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->vai_tro == 'giao_vien') {
+                return redirect()->route('teacher.dashboard');
+            } else {
+                return redirect()->route('home');
+            }
         }
 
-        return response()->json(['message' => 'Tên đăng nhập hoặc mật khẩu không đúng!'], 401);
+        return back()->withErrors([
+            'ten_dang_nhap' => 'Thông tin đăng nhập không chính xác.',
+        ])->withInput($request->except('mat_khau'));
     }
 
     // Đăng xuất người dùng
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
-        return response()->json(['message' => 'Đăng xuất thành công!'], 200);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/');
     }
 }
 
