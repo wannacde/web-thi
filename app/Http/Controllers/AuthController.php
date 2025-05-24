@@ -63,9 +63,8 @@ class AuthController extends Controller
             // Chuyển hướng dựa trên vai trò
             if ($user->vai_tro == 'quan_tri') {
                 return redirect()->route('admin.dashboard');
-            } elseif ($user->vai_tro == 'giao_vien') {
-                return redirect()->route('teacher.dashboard');
             } else {
+                // Cả giáo viên và học sinh đều chuyển hướng về trang chủ
                 return redirect()->route('home');
             }
         }

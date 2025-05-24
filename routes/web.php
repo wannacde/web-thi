@@ -20,7 +20,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register.view');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     
-    // Route cho quên mật khẩu    Route::get('/forgot-password', [PasswordController::class, 'showForgotForm'])->name('password.request');
+    // Route cho quên mật khẩu
+    Route::get('/forgot-password', [PasswordController::class, 'showForgotForm'])->name('password.request');
     Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->name('password.email');
     Route::get('/reset-password/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->name('password.update');

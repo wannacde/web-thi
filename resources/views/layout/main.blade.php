@@ -17,6 +17,8 @@
             background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
             color: #333;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
         nav {
             background: linear-gradient(90deg, #3490dc 0%, #6a82fb 100%);
@@ -26,23 +28,21 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 24px rgba(52,144,220,0.10);
-            width: 100vw;
-            min-width: 100vw;
+            width: 100%;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
             border-radius: 0;
             min-height: 64px;
+            box-sizing: border-box;
         }
         nav > div {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 1.2rem;
-            max-width: 100vw;
             overflow-x: auto;
-            margin-right: 5rem; /* Dịch sang trái */
         }
         nav a, nav form {
             margin-left: 0 !important;
@@ -164,9 +164,10 @@
             font-weight: 600;
             font-size: 1.1rem;
             box-shadow: 0 2px 8px rgba(52,144,220,0.12);
-            transition: background 0.3
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
+            text-decoration: none;
         }
         .btn-primary i {
             margin-right: 0.5rem;
@@ -174,6 +175,7 @@
         .btn-primary:hover {
             background: linear-gradient(90deg, #3490dc 0%, #6a82fb 100%);
             box-shadow: 0 4px 16px rgba(52,144,220,0.18);
+            transform: translateY(-2px);
         }
         .alert {
             padding: 0.75rem 1rem;
@@ -201,9 +203,23 @@
             color: #856404;
             border: 1px solid #ffeeba;
         }
+        
+        /* Footer Styles */
+        footer {
+            background: linear-gradient(90deg, #3490dc 0%, #6a82fb 100%);
+            color: white;
+            padding: 3rem 2rem 1rem;
+            margin-top: 3rem;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
         @media (max-width: 700px) {
             .container {
                 padding: 1rem;
+                margin: 1rem;
             }
             nav {
                 flex-direction: column;
@@ -227,19 +243,17 @@
     <nav>
         <a href="{{ url('/') }}" class="logo"><i class="fa fa-graduation-cap"></i>Hệ thống thi trực tuyến</a>
         <div>
+            <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
             @guest
                 <a href="{{ route('login.view') }}"><i class="fa fa-sign-in-alt"></i>Đăng nhập</a>
                 <a href="{{ route('register.view') }}"><i class="fa fa-user-plus"></i>Đăng ký</a>
                 <a href="{{ route('password.request') }}"><i class="fa fa-key"></i>Quên mật khẩu</a>
             @else
                 @if(Auth::user()->vai_tro == 'quan_tri')
-                    <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('admin.dashboard') }}"><i class="fa fa-user-shield"></i>Dashboard</a>
                 @elseif(Auth::user()->vai_tro == 'giao_vien')
-                    <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('teacher.dashboard') }}"><i class="fa fa-chalkboard-teacher"></i>Dashboard</a>
                 @endif
-                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                 <a href="{{ route('results.index') }}"><i class="fa fa-poll"></i>Kết quả</a>
                 <a href="{{ route('password.change.form') }}"><i class="fa fa-key"></i>Đổi mật khẩu</a>
                 <form action="{{ route('logout') }}" method="POST">
@@ -249,6 +263,7 @@
             @endguest
         </div>
     </nav>
+    
     <div class="container">
         <!-- Flash Messages -->
         @if(session('success'))
@@ -271,8 +286,16 @@
                 {{ session('warning') }}
             </div>
         @endif
+        
         @yield('content')
     </div>
+    
+    <footer>
+        <div class="footer-container">
+            @yield('footer')
+        </div>
+    </footer>
+    
     @yield('scripts')
 </body>
 </html>

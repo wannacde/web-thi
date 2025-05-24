@@ -7,7 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: white;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
@@ -29,7 +29,7 @@
         .button {
             display: inline-block;
             background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
-            color: white;
+            color:rgb(255, 255, 255) !important;
             text-decoration: none;
             padding: 10px 20px;
             border-radius: 5px;

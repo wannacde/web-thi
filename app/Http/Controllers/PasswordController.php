@@ -85,28 +85,44 @@ class PasswordController extends Controller
     }
 
     // Xử lý đặt lại mật khẩu
-    public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:6|confirmed',
-        ]);
+public function resetPassword(Request $request)
+{
+    $request->validate([
+        'token' => 'required',
+        'email' => 'required|email',
+        'password' => 'required|min:6|confirmed',
+    ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->mat_khau = Hash::make($password);
-                $user->save();
+    // Lấy token từ database
+    $tokenRecord = \DB::table('password_resets')
+        ->where('email', $request->email)
+        ->first();
 
-                event(new PasswordReset($user));
-            }
-        );
-
-        return $status === Password::PASSWORD_RESET
-                    ? redirect()->route('login.view')->with('status', 'Mật khẩu đã được đặt lại!')
-                    : back()->withErrors(['email' => 'Đã xảy ra lỗi khi đặt lại mật khẩu.']);
+    if (!$tokenRecord || !Hash::check($request->token, $tokenRecord->token)) {
+        return back()->withErrors(['email' => 'Token không hợp lệ hoặc đã hết hạn.']);
     }
+
+    // Kiểm tra thời gian tạo token (60 phút)
+    if (now()->diffInMinutes($tokenRecord->created_at) > 60) {
+        return back()->withErrors(['email' => 'Token đã hết hạn.']);
+    }
+
+    // Tìm user và cập nhật mật khẩu
+    $user = NguoiDung::where('email', $request->email)->first();
+    
+    if (!$user) {
+        return back()->withErrors(['email' => 'Không tìm thấy người dùng với email này.']);
+    }
+
+    $user->mat_khau = Hash::make($request->password);
+    $user->save();
+
+    // Xóa token đã sử dụng
+    \DB::table('password_resets')->where('email', $request->email)->delete();
+
+    return redirect()->route('login.view')->with('status', 'Mật khẩu đã được đặt lại!');
+}
+
 
     // Hiển thị form đổi mật khẩu (khi đã đăng nhập)
     public function showChangePasswordForm()
