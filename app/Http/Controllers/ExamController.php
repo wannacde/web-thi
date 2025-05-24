@@ -112,9 +112,76 @@ class ExamController extends Controller
 
     public function submitExam(Request $request, $slug)
     {
-        $exam = BaiThi::where('slug', $slug)->firstOrFail();
-        // Xử lý nộp bài thi
-        return redirect()->route('exams.show', $exam->slug)->with('success', 'Bài thi đã được nộp thành công.');
+        $exam = BaiThi::where('slug', $slug)->with(['cauHoi.dapAn'])->firstOrFail();
+        $user = Auth::user();
+
+        // Kiểm tra học sinh đã làm bài chưa
+        $existingResult = \App\Models\KetQuaBaiThi::where('ma_bai_thi', $exam->ma_bai_thi)
+            ->where('ma_nguoi_dung', $user->ma_nguoi_dung)
+            ->first();
+        if ($existingResult) {
+            return redirect()->route('results.show', $existingResult->ma_ket_qua)
+                ->with('info', 'Bạn đã nộp bài thi này.');
+        }
+
+        $answers = $request->input('question', []);
+        $totalQuestions = $exam->cauHoi->count();
+        $correct = 0;
+        $traLoiArr = [];
+
+        foreach ($exam->cauHoi as $cauHoi) {
+            $userAnswer = $answers[$cauHoi->ma_cau_hoi] ?? null;
+            $isCorrect = false;
+            $correctAnswer = null;
+
+            if ($cauHoi->loai_cau_hoi == 'trac_nghiem') {
+                foreach ($cauHoi->dapAn as $dapAn) {
+                    if ($dapAn->dung_sai && $dapAn->ma_dap_an == $userAnswer) {
+                        $isCorrect = true;
+                        $correctAnswer = $dapAn->ma_dap_an;
+                        break;
+                    }
+                    if ($dapAn->dung_sai) {
+                        $correctAnswer = $dapAn->ma_dap_an;
+                    }
+                }
+            } else { // điền khuyết
+                foreach ($cauHoi->dapAn as $dapAn) {
+                    if (mb_strtolower(trim($userAnswer)) === mb_strtolower(trim($dapAn->noi_dung))) {
+                        $isCorrect = true;
+                        $correctAnswer = $dapAn->noi_dung;
+                        break;
+                    }
+                    if ($dapAn->dung_sai) {
+                        $correctAnswer = $dapAn->noi_dung;
+                    }
+                }
+            }
+
+            if ($isCorrect) $correct++;
+
+            $traLoiArr[] = [
+                'ma_cau_hoi' => $cauHoi->ma_cau_hoi,
+                'dap_an_chon' => $userAnswer,
+                'dung_sai' => $isCorrect,
+            ];
+        }
+
+        $score = $totalQuestions > 0 ? round($correct * 10 / $totalQuestions, 2) : 0;
+        $result = \App\Models\KetQuaBaiThi::create([
+            'ma_bai_thi' => $exam->ma_bai_thi,
+            'ma_nguoi_dung' => $user->ma_nguoi_dung,
+            'diem' => $score,
+            'ngay_nop' => now(),
+        ]);
+
+        foreach ($traLoiArr as $tl) {
+            $tl['ma_ket_qua'] = $result->ma_ket_qua;
+            \App\Models\TraLoiNguoiDung::create($tl);
+        }
+
+        return redirect()->route('results.show', $result->ma_ket_qua)
+            ->with('success', 'Nộp bài thành công!');
     }
 
     public function generateQuestions(Request $request)

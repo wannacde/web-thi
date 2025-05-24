@@ -92,11 +92,23 @@
                 <li>Sau khi bắt đầu làm bài, hệ thống sẽ tính thời gian làm bài.</li>
                 <li>Khi hết thời gian, bài thi sẽ tự động nộp.</li>
                 <li>Bạn chỉ được làm bài thi một lần duy nhất.</li>
-                <li>Nhấn nút "Làm bài" để bắt đầu.</li>
+                @php
+                    $hasResult = \App\Models\KetQuaBaiThi::where('ma_bai_thi', $exam->ma_bai_thi)
+                        ->where('ma_nguoi_dung', Auth::user()->ma_nguoi_dung)
+                        ->exists();
+                @endphp
+                @if($hasResult)
+                    <li><span style="color: #e3342f; font-weight: bold;">Bạn đã làm bài thi này. Không thể làm lại.</span></li>
+                @else
+                    <li>Nhấn nút "Làm bài" để bắt đầu.</li>
+                @endif
             </ul>
-            
             <div class="start-exam">
-                <a href="{{ route('exams.take', $exam->slug) }}" class="btn-primary">Làm bài</a>
+                @if(!$hasResult)
+                    <a href="{{ route('exams.take', $exam->slug) }}" class="btn-primary">Làm bài</a>
+                @else
+                    <a href="{{ route('results.index') }}" class="btn-primary">Xem kết quả</a>
+                @endif
             </div>
         </div>
     @endif
