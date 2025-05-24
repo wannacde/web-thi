@@ -207,18 +207,29 @@
             chuongSelect.disabled = !monHocId;
             if (!monHocId) return;
             fetch(`/chuong/${monHocId}`, {
+                method: 'GET',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(async response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     return response.json();
                 } else {
-                    const html = await response.text();
-                    throw new Error('Server trả về không phải JSON');
+                    const text = await response.text();
+                    try {
+                        // Thử parse text thành JSON
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('Server trả về không phải JSON');
+                    }
                 }
             })
             .then(chuongs => {

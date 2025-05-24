@@ -4,6 +4,7 @@ use App\Http\Controllers\RandomExamController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\SubjectController;
@@ -18,10 +19,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register.view');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
+    
+    // Route cho quên mật khẩu    Route::get('/forgot-password', [PasswordController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Route cho đổi mật khẩu
+    Route::get('/change-password', [PasswordController::class, 'showChangePasswordForm'])->name('password.change.form');
+    Route::post('/change-password', [PasswordController::class, 'changePassword'])->name('password.change');
     
     // Dashboard routes
     Route::get('/admin/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('role:quan_tri');

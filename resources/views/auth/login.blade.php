@@ -32,5 +32,6 @@
         </div>
 
         <p>Chưa có tài khoản? <a href="{{ route('register.view') }}">Đăng ký ngay</a></p>
+        <p><a href="{{ route('password.request') }}">Quên mật khẩu?</a></p>
     </form>
 @endsection
