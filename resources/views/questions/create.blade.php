@@ -101,7 +101,25 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    }
+    .form-group label:before {
+        content: '\f044';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
+    }
+    .btn-primary i {
+        margin-right: 0.5rem;
+    }
     .form-actions {
         margin-top: 2rem;
         display: flex;

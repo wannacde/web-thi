@@ -91,102 +91,37 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    .subject-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    }
+    .subject-header h1:before {
+        content: '\f02d';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
+    }
+    .chapter-list li {
+        background: #fff;
+        border-left: 4px solid #3490dc;
         margin-bottom: 1.5rem;
-    }
-    .subject-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-        text-decoration: none;
-    }
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        text-decoration: none;
-    }
-    .subject-details {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    .detail-section {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
+        padding: 1rem 1.5rem;
         border-radius: 8px;
     }
-    .detail-item {
-        margin-bottom: 0.5rem;
-    }
-    .chapters-list, .exams-list {
-        list-style-type: none;
-        padding: 0;
-    }
-    .chapter-item, .exam-item {
-        background-color: #fff;
-        padding: 1rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-    }
-    .chapter-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .chapter-level {
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
-        color: white;
-    }
-    .level-easy {
-        background-color: #28a745;
-    }
-    .level-medium {
-        background-color: #ffc107;
-        color: #212529;
-    }
-    .level-hard {
-        background-color: #dc3545;
-    }
-    .chapter-content {
-        margin-top: 0.5rem;
-    }
-    .exam-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .exam-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .exam-details {
-        margin-top: 0.5rem;
-    }
-    .exam-details p {
-        margin: 0.25rem 0;
-    }
-    
-    @media (min-width: 768px) {
-        .subject-details {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .detail-section:first-child {
-            grid-column: 1 / -1;
-        }
+    .exams-list .exam-item {
+        background: #f8f9fa;
+        border-left: 4px solid #6a82fb;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(106,130,251,0.08);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
     }
 </style>
 @endsection

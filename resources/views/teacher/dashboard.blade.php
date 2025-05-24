@@ -67,80 +67,40 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    .dashboard-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
     }
-    .stat-card {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .dashboard-stats .stat-card {
+        background: linear-gradient(90deg, #6a82fb 0%, #3490dc 100%);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.12);
     }
     .stat-value {
         font-size: 2.5rem;
         font-weight: bold;
-        color: #3490dc;
+        color: #fff;
     }
     .stat-label {
         font-size: 1.2rem;
-        color: #666;
+        color: #e0eafc;
         margin-top: 0.5rem;
     }
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    .my-exams-section {
-        margin-bottom: 2rem;
-    }
-    .list-exams {
-        list-style-type: none;
-        padding: 0;
+    .btn-primary i {
+        margin-right: 0.5rem;
     }
     .exam-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-    .exam-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .exam-details {
-        margin-top: 0.5rem;
-    }
-    .exam-details p {
-        margin: 0.25rem 0;
-    }
-    .dashboard-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-    .action-card {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .action-card h2 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-    }
-    .action-card p {
+        background: #fff;
+        border-left: 4px solid #3490dc;
         margin-bottom: 1.5rem;
-        color: #666;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
     }
 </style>
 @endsection

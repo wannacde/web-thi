@@ -54,42 +54,38 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    .results-header {
-        margin-bottom: 1.5rem;
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
     }
-    .results-filters {
-        margin-bottom: 1.5rem;
-    }
-    .search-input {
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 100%;
-    }
-    .results-table-container {
-        overflow-x: auto;
-    }
-    .results-table {
-        width: 100%;
-        border-collapse: collapse;
+    .results-header h1:before {
+        content: '\f559';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
     }
     .results-table th, .results-table td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #eee;
+        vertical-align: middle;
     }
-    .results-table th {
-        background-color: #f8f9fa;
-        font-weight: bold;
+    .btn-primary i {
+        margin-right: 0.5rem;
     }
     .results-table tr:hover {
-        background-color: #f8f9fa;
+        background: #e0eafc;
     }
-    .pagination {
-        margin-top: 1.5rem;
-        display: flex;
-        justify-content: center;
+    .search-input {
+        background: #f8f9fa;
+        border: 1px solid #3490dc;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        margin-bottom: 1rem;
     }
 </style>
 @endsection

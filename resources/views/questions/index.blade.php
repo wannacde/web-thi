@@ -39,7 +39,33 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    }
+    .questions-header h1:before {
+        content: '\f02d';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
+    }
+    .questions-list li {
+        background: #fff;
+        border-left: 4px solid #3490dc;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+    }
+    .btn-primary i {
+        margin-right: 0.5rem;
+    }
     .questions-header {
         display: flex;
         justify-content: space-between;

@@ -123,95 +123,52 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    .result-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
     }
-    .result-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .result-info {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    .info-section {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-    }
-    .info-item {
-        margin-bottom: 0.5rem;
-    }
-    .score-display {
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-    .score {
-        font-size: 3rem;
-        font-weight: bold;
+    .result-header h1:before {
+        content: '\f559';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
         color: #3490dc;
     }
-    .score-label {
-        font-size: 1.2rem;
-        color: #666;
-    }
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+    .score-display .score {
+        font-size: 2.5rem;
+        color: #3490dc;
+        font-weight: bold;
     }
     .stat-item {
         text-align: center;
-        background-color: #fff;
-        padding: 1rem;
-        border-radius: 8px;
     }
     .stat-value {
-        font-size: 1.5rem;
-        font-weight: bold;
+        font-size: 1.2rem;
+        color: #6a82fb;
+        font-weight: 600;
     }
     .stat-label {
-        color: #666;
+        color: #888;
     }
-    .answers-review {
-        margin-top: 2rem;
-    }
-    .question-review {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        border-left: 5px solid #ccc;
+    .answers-review h2:before {
+        content: '\f02d';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #6a82fb;
     }
     .question-review.correct {
-        border-left-color: #28a745;
+        border-left: 4px solid #38c172;
+        background: #e6ffed;
     }
     .question-review.incorrect {
-        border-left-color: #dc3545;
-    }
-    .answer-details {
-        margin-top: 1rem;
-    }
-    .user-answer, .correct-answer {
-        margin-bottom: 0.5rem;
-    }
-    .correct-text {
-        color: #28a745;
-    }
-    .incorrect-text {
-        color: #dc3545;
-    }
-    
-    @media (max-width: 768px) {
-        .result-info {
-            grid-template-columns: 1fr;
-        }
+        border-left: 4px solid #e3342f;
+        background: #ffeaea;
     }
 </style>
 @endsection

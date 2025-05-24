@@ -8,11 +8,11 @@
         <div class="exam-actions">
             @if(Auth::user()->vai_tro != 'hoc_sinh' && 
                 (Auth::user()->vai_tro == 'quan_tri' || Auth::user()->ma_nguoi_dung == $exam->nguoi_tao))
-                <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary">Sửa</a>
+                <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary"><i class="fas fa-edit"></i>Sửa</a>
                 <form action="{{ route('exams.destroy', $exam->slug) }}" method="POST" style="display: inline;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')">Xóa</button>
+                    <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')"><i class="fas fa-trash"></i>Xóa</button>
                 </form>
             @endif
         </div>
@@ -115,67 +115,47 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    .exam-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
     }
-    .exam-actions {
-        display: flex;
-        gap: 0.5rem;
+    .exam-header h1:before {
+        content: '\f02d';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
     }
     .exam-info {
-        background-color: #f8f9fa;
-        padding: 1rem;
+        background: #f8f9fa;
         border-radius: 8px;
+        padding: 1rem 2rem;
         margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
     }
-    .info-item {
-        margin-bottom: 0.5rem;
-    }
-    .info-item:last-child {
-        margin-bottom: 0;
-    }
-    .exam-questions, .exam-instructions {
-        margin-top: 2rem;
-    }
-    .questions-list {
-        padding-left: 1.5rem;
+    .exam-actions .btn-primary i {
+        margin-right: 0.5rem;
     }
     .questions-list li {
+        background: #fff;
+        border-left: 4px solid #3490dc;
         margin-bottom: 1.5rem;
-    }
-    .question-content {
-        background-color: #f8f9fa;
-        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
+        padding: 1rem 1.5rem;
         border-radius: 8px;
     }
-    .answers ul {
-        list-style-type: none;
-        padding-left: 1rem;
-    }
-    .answers li {
-        margin-bottom: 0.5rem;
-        padding: 0.5rem;
-        background-color: #fff;
-        border-radius: 4px;
-    }
-    .correct-answer {
-        background-color: #d4edda;
-    }
     .correct-badge {
-        background-color: #28a745;
-        color: white;
-        padding: 0.2rem 0.5rem;
+        background: #38c172;
+        color: #fff;
         border-radius: 4px;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.9rem;
         margin-left: 0.5rem;
-        font-size: 0.8rem;
-    }
-    .start-exam {
-        margin-top: 2rem;
-        text-align: center;
     }
 </style>
 @endsection

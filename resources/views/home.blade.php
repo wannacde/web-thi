@@ -49,7 +49,30 @@
 @endsection
 
 @section('styles')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    body {
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    }
+    .home-header h1:before {
+        content: '\f015';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 0.5rem;
+        color: #3490dc;
+    }
+    .home-content {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(52,144,220,0.12);
+        padding: 2rem 3rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
     .welcome-section {
         text-align: center;
         margin-bottom: 2rem;
