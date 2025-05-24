@@ -7,7 +7,7 @@
         <h1>Danh sách bài thi</h1>
         
         @if(Auth::user() && Auth::user()->vai_tro != 'hoc_sinh')
-            <a href="{{ route('exam.create') }}" class="btn-primary">Tạo bài thi mới</a>
+            <a href="{{ route('exams.create') }}" class="btn-primary">Tạo bài thi mới</a>
         @endif
     </div>
 
@@ -42,17 +42,17 @@
                         </div>
                     </div>
                     <div class="exam-actions">
-                        <a href="{{ route('exam.detail', $exam->ma_bai_thi) }}" class="btn-primary">Chi tiết</a>
+                        <a href="{{ route('exams.show', $exam->slug) }}" class="btn-primary">Chi tiết</a>
                         
                         @if(Auth::user()->vai_tro == 'hoc_sinh')
-                            <a href="{{ route('exam.take', $exam->ma_bai_thi) }}" class="btn-primary">Làm bài</a>
+                            <a href="{{ route('exams.take', $exam->slug) }}" class="btn-primary">Làm bài</a>
                         @endif
                         
                         @if(Auth::user()->vai_tro != 'hoc_sinh' && 
                             (Auth::user()->vai_tro == 'quan_tri' || Auth::user()->ma_nguoi_dung == $exam->nguoi_tao))
-                            <a href="{{ route('exam.edit', $exam->ma_bai_thi) }}" class="btn-primary">Sửa</a>
+                            <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary">Sửa</a>
                             
-                            <form action="{{ route('exam.destroy', $exam->ma_bai_thi) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('exams.destroy', $exam->slug) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')">Xóa</button>
@@ -69,43 +69,120 @@
 
 @section('styles')
 <style>
+    body {
+        font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+        min-height: 100vh;
+    }
     .exam-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem 2rem 0 2rem;
+    }
+    .exam-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #3b3b5c;
+        letter-spacing: 1px;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+        transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+        box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+        transform: translateY(-2px) scale(1.03);
     }
     .exam-filters {
         display: flex;
         gap: 1rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 0 2rem;
     }
     .search-input, .filter-select {
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 0.7rem 1rem;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: #fff;
+        transition: border 0.2s;
+        box-shadow: 0 1px 4px rgba(99,102,241,0.04);
     }
-    .search-input {
-        flex-grow: 1;
+    .search-input:focus, .filter-select:focus {
+        border: 1.5px solid #6366f1;
+        outline: none;
+    }
+    .list-exams {
+        list-style-type: none;
+        padding: 0 2rem 2rem 2rem;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 2rem;
     }
     .exam-item {
+        background: linear-gradient(120deg, #fff 60%, #e0e7ff 100%);
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(99,102,241,0.10);
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+        min-height: 220px;
+        transition: box-shadow 0.2s, transform 0.15s;
+        position: relative;
+        overflow: hidden;
+    }
+    .exam-item:hover {
+        box-shadow: 0 8px 32px rgba(99,102,241,0.18);
+        transform: translateY(-4px) scale(1.02);
+    }
+    .exam-content h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #3730a3;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+    .exam-details {
+        margin-top: 0.5rem;
+        color: #6366f1;
+        font-size: 1rem;
+    }
+    .exam-details p {
+        margin: 0.2rem 0;
     }
     .exam-actions {
         display: flex;
         gap: 0.5rem;
+        margin-top: 1.2rem;
     }
-    .exam-details {
-        margin-top: 0.5rem;
+    .exam-actions .btn-primary {
+        font-size: 0.98rem;
+        padding: 0.5rem 1.1rem;
     }
-    .exam-details p {
-        margin: 0.25rem 0;
+    @media (max-width: 700px) {
+        .exam-header, .exam-filters, .list-exams {
+            padding: 0 0.5rem;
+        }
+        .list-exams {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endsection

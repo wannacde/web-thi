@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('exam.update', $exam->ma_bai_thi) }}" id="editExamForm">
+    <form method="POST" action="{{ route('exams.update', $exam->slug) }}" id="editExamForm">
         @csrf
         @method('PUT')
         
@@ -28,7 +28,7 @@
             <label for="ma_mon_hoc">Môn học</label>
             <select id="ma_mon_hoc" name="ma_mon_hoc" required>
                 <option value="">-- Chọn môn học --</option>
-                @foreach($monHocs as $monHoc)
+                @foreach($subjects as $monHoc)
                     <option value="{{ $monHoc->ma_mon_hoc }}" {{ old('ma_mon_hoc', $exam->ma_mon_hoc) == $monHoc->ma_mon_hoc ? 'selected' : '' }}>
                         {{ $monHoc->ten_mon_hoc }}
                     </option>
@@ -58,7 +58,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn-primary">Cập nhật bài thi</button>
-            <a href="{{ route('exam.detail', $exam->ma_bai_thi) }}" class="btn-secondary">Hủy</a>
+            <a href="{{ route('exams.show', $exam->slug) }}" class="btn-secondary">Hủy</a>
         </div>
     </form>
 @endsection

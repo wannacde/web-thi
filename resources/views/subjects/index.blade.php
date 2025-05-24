@@ -20,13 +20,13 @@
                         <p><strong>Số chương:</strong> {{ $subject->chuong_count }}</p>
                     </div>
                     <div class="subject-actions">
-                        <a href="{{ route('subjects.show', $subject->ma_mon_hoc) }}" class="btn-primary">Chi tiết</a>
-                        <a href="{{ route('subjects.chapters', $subject->ma_mon_hoc) }}" class="btn-primary">Quản lý chương</a>
+                        <a href="{{ route('subjects.show', $subject->slug) }}" class="btn-primary">Chi tiết</a>
+                        <a href="{{ route('subjects.chapters', $subject->slug) }}" class="btn-primary">Quản lý chương</a>
                         
                         @if(Auth::user()->vai_tro == 'quan_tri')
-                            <a href="{{ route('subjects.edit', $subject->ma_mon_hoc) }}" class="btn-primary">Sửa</a>
+                            <a href="{{ route('subjects.edit', $subject->slug) }}" class="btn-primary">Sửa</a>
                             
-                            <form action="{{ route('subjects.destroy', $subject->ma_mon_hoc) }}" method="POST" style="display: inline;">
+                            <form action="{{ route('subjects.destroy', $subject->slug) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa môn học này?')">Xóa</button>

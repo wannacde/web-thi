@@ -20,7 +20,7 @@
     <div class="my-exams-section">
         <div class="section-header">
             <h2>Bài thi của tôi</h2>
-            <a href="{{ route('exam.create') }}" class="btn-primary">Tạo bài thi mới</a>
+            <a href="{{ route('exams.create') }}" class="btn-primary">Tạo bài thi mới</a>
         </div>
         
         @if(count($myExams) > 0)
@@ -36,8 +36,8 @@
                             </div>
                         </div>
                         <div class="exam-actions">
-                            <a href="{{ route('exam.detail', $exam->ma_bai_thi) }}" class="btn-primary">Chi tiết</a>
-                            <a href="{{ route('exam.edit', $exam->ma_bai_thi) }}" class="btn-primary">Sửa</a>
+                            <a href="{{ route('exams.show', $exam->slug) }}" class="btn-primary">Chi tiết</a>
+                            <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary">Sửa</a>
                         </div>
                     </li>
                 @endforeach
@@ -56,7 +56,7 @@
         <div class="action-card">
             <h2>Quản lý bài thi</h2>
             <p>Thêm, sửa, xóa bài thi</p>
-            <a href="{{ route('exam.list') }}" class="btn-primary">Quản lý bài thi</a>
+            <a href="{{ route('exams.index') }}" class="btn-primary">Quản lý bài thi</a>
         </div>
         <div class="action-card">
             <h2>Xem kết quả</h2>

@@ -8,12 +8,12 @@
         <h1>{{ $subject->ten_mon_hoc }}</h1>
         <div class="subject-actions">
             <a href="{{ route('subjects.index') }}" class="btn-secondary">Quay lại</a>
-            <a href="{{ route('subjects.chapters', $subject->ma_mon_hoc) }}" class="btn-primary">Quản lý chương</a>
+            <a href="{{ route('subjects.chapters', $subject->slug) }}" class="btn-primary">Quản lý chương</a>
             
             @if(Auth::user()->vai_tro == 'quan_tri')
-                <a href="{{ route('subjects.edit', $subject->ma_mon_hoc) }}" class="btn-primary">Sửa</a>
+                <a href="{{ route('subjects.edit', $subject->slug) }}" class="btn-primary">Sửa</a>
                 
-                <form action="{{ route('subjects.destroy', $subject->ma_mon_hoc) }}" method="POST" style="display: inline;">
+                <form action="{{ route('subjects.destroy', $subject->slug) }}" method="POST" style="display: inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa môn học này?')">Xóa</button>
@@ -78,7 +78,7 @@
                                 </div>
                             </div>
                             <div class="exam-actions">
-                                <a href="{{ route('exam.detail', $exam->ma_bai_thi) }}" class="btn-primary">Chi tiết</a>
+                                <a href="{{ route('exams.show', $exam->slug) }}" class="btn-primary">Chi tiết</a>
                             </div>
                         </li>
                     @endforeach

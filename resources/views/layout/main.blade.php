@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title') - Hệ thống thi trực tuyến</title>
@@ -100,7 +103,7 @@
     <nav>
         <a href="{{ url('/') }}">Hệ thống thi trực tuyến</a>
         <div>
-            <a href="{{ route('exam.list') }}">Bài thi</a>
+            <a href="{{ route('exams.index') }}">Bài thi</a>
             @guest
                 <a href="{{ route('login.view') }}">Đăng nhập</a>
                 <a href="{{ route('register.view') }}">Đăng ký</a>
@@ -110,8 +113,6 @@
                 @elseif(Auth::user()->vai_tro == 'giao_vien')
                     <a href="{{ route('teacher.dashboard') }}">Dashboard</a>
                 @endif
-                <a href="{{ route('questions.index') }}">Câu hỏi</a>
-                <a href="{{ route('subjects.index') }}">Môn học</a>
                 <a href="{{ route('results.index') }}">Kết quả</a>
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf

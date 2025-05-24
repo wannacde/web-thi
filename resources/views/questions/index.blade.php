@@ -9,79 +9,33 @@
     </div>
 
     <div class="questions-filters">
-        <input type="text" id="searchQuestion" placeholder="Tìm kiếm câu hỏi..." class="search-input">
-        <select id="chapterFilter" class="filter-select">
-            <option value="">Tất cả chương</option>
-            @php
-                $chapters = [];
-            @endphp
-            @foreach($questions as $question)
-                @if(!in_array($question->chuong->ma_chuong, $chapters))
-                    <option value="{{ $question->chuong->ma_chuong }}">
-                        {{ $question->chuong->monHoc->ten_mon_hoc }} - {{ $question->chuong->ten_chuong }}
-                    </option>
-                    @php
-                        $chapters[] = $question->chuong->ma_chuong;
-                    @endphp
-                @endif
+        <select id="subjectFilter" class="filter-select">
+            <option value="">Tất cả môn học</option>
+            @foreach($subjects as $subject)
+                <option value="{{ $subject->ma_mon_hoc }}">
+                    {{ $subject->ten_mon_hoc }}
+                </option>
             @endforeach
         </select>
+        
+        <select id="chapterFilter" class="filter-select" disabled>
+            <option value="">Tất cả chương</option>
+        </select>
+        
         <select id="typeFilter" class="filter-select">
             <option value="">Tất cả loại</option>
             <option value="trac_nghiem">Trắc nghiệm</option>
             <option value="dien_khuyet">Điền khuyết</option>
         </select>
+        
+        <input type="text" id="searchQuestion" placeholder="Tìm kiếm câu hỏi..." class="search-input">
+        
+        <button id="searchButton" class="btn-primary">Tìm kiếm</button>
     </div>
 
-    @if(count($questions) > 0)
-        <ul class="list-questions">
-            @foreach($questions as $question)
-                <li class="question-item" data-chapter="{{ $question->chuong->ma_chuong }}" data-type="{{ $question->loai_cau_hoi }}">
-                    <div class="question-content">
-                        <h3>{{ $question->noi_dung }}</h3>
-                        <div class="question-meta">
-                            <span>Môn học: {{ $question->chuong->monHoc->ten_mon_hoc }}</span> |
-                            <span>Chương: {{ $question->chuong->ten_chuong }}</span> |
-                            <span>Loại: {{ $question->loai_cau_hoi == 'trac_nghiem' ? 'Trắc nghiệm' : 'Điền khuyết' }}</span>
-                        </div>
-                        
-                        @if(count($question->dapAn) > 0)
-                            <div class="answers">
-                                <strong>Đáp án:</strong>
-                                <ul>
-                                    @foreach($question->dapAn as $dapAn)
-                                        <li class="{{ $dapAn->dung_sai ? 'correct-answer' : '' }}">
-                                            {{ $dapAn->noi_dung }}
-                                            @if($dapAn->dung_sai)
-                                                <span class="correct-badge">Đúng</span>
-                                            @endif
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-                    
-                    <div class="question-actions">
-                        <a href="{{ route('questions.edit', $question->ma_cau_hoi) }}" class="btn-primary">Sửa</a>
-                        <form action="{{ route('questions.destroy', $question->ma_cau_hoi) }}" method="POST" style="display: inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')">Xóa</button>
-                        </form>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
-        
-        @if(method_exists($questions, 'links'))
-            <div class="pagination">
-                {{ $questions->links() }}
-            </div>
-        @endif
-    @else
-        <p>Không có câu hỏi nào.</p>
-    @endif
+    <div id="searchResults">
+        @include('questions.partials.question-list')
+    </div>
 @endsection
 
 @section('styles')
@@ -96,6 +50,7 @@
         display: flex;
         gap: 1rem;
         margin-bottom: 1.5rem;
+        align-items: center;
     }
     .search-input, .filter-select {
         padding: 0.5rem;
@@ -160,43 +115,197 @@
         margin-top: 1.5rem;
         display: flex;
         justify-content: center;
+        gap: 5px;
+    }
+    .pagination nav {
+        display: flex;
+        justify-content: center;
+        border: none !important;
+        background: none !important;
+    }
+    .pagination ul {
+        display: flex;
+        list-style: none !important;
+        padding: 0;
+        margin: 0;
+        gap: 5px;
+    }
+    .pagination li {
+        list-style: none !important;
+    }
+    .pagination li::marker {
+        display: none !important;
+        content: none !important;
+    }
+    .pagination .page-link {
+        padding: 5px 10px;
+        color: #333;
+        text-decoration: none;
+        background: none;
+        border-radius: 4px;
+        display: inline-block;
+        min-width: 35px;
+        text-align: center;
+    }
+    .pagination .page-item.active .page-link {
+        font-weight: bold;
+        color: #007bff !important;
+    }
+    .pagination .page-item.disabled .page-link {
+        color: #ccc;
+        pointer-events: none;
+    }
+    #searchResults {
+        min-height: 200px;
+    }
+    .no-results {
+        text-align: center;
+        padding: 20px;
+        font-weight: bold;
+        color: #6c757d;
     }
 </style>
 @endsection
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchQuestion');
-        const chapterFilter = document.getElementById('chapterFilter');
-        const typeFilter = document.getElementById('typeFilter');
-        const questionItems = document.querySelectorAll('.question-item');
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchQuestion');
+    const subjectFilter = document.getElementById('subjectFilter');
+    const chapterFilter = document.getElementById('chapterFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const searchButton = document.getElementById('searchButton');
+    const searchResults = document.getElementById('searchResults');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Handle subject change
+    subjectFilter.addEventListener('change', function() {
+        const selectedSubject = this.value;
         
-        function filterQuestions() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const chapterId = chapterFilter.value;
-            const questionType = typeFilter.value;
-            
-            questionItems.forEach(item => {
-                const content = item.querySelector('.question-content').textContent.toLowerCase();
-                const itemChapterId = item.dataset.chapter;
-                const itemType = item.dataset.type;
-                
-                const matchesSearch = content.includes(searchTerm);
-                const matchesChapter = chapterId === '' || itemChapterId === chapterId;
-                const matchesType = questionType === '' || itemType === questionType;
-                
-                if (matchesSearch && matchesChapter && matchesType) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+        if (!selectedSubject) {
+            chapterFilter.disabled = true;
+            chapterFilter.innerHTML = '<option value="">Tất cả chương</option>';
+            return;
         }
         
-        searchInput.addEventListener('input', filterQuestions);
-        chapterFilter.addEventListener('change', filterQuestions);
-        typeFilter.addEventListener('change', filterQuestions);
+        fetch(`/chuong/${selectedSubject}`)
+            .then(response => response.json())
+            .then(chuongs => {
+                let options = '<option value="">Tất cả chương</option>';
+                chuongs.forEach(chuong => {
+                    options += `<option value="${chuong.ma_chuong}">${chuong.ten_chuong}</option>`;
+                });
+                chapterFilter.innerHTML = options;
+                chapterFilter.disabled = false;
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy danh sách chương:', error);
+                chapterFilter.disabled = true;
+            });
     });
+    
+    // Handle search button click
+    searchButton.addEventListener('click', performSearch);
+    
+    // Handle enter key in search input
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    function performSearch() {
+        const searchTerm = searchInput.value;
+        const subjectId = subjectFilter.value;
+        const chapterId = chapterFilter.value;
+        const questionType = typeFilter.value;
+
+        // Build query string
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('search', searchTerm);
+        if (subjectId) params.append('subject', subjectId);
+        if (chapterId) params.append('chapter', chapterId);
+        if (questionType) params.append('type', questionType);
+
+        // Show loading
+        searchResults.innerHTML = '<div class="text-center"><p>Đang tìm kiếm...</p></div>';
+
+        // Send AJAX request
+        fetch(`/questions/search?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(async response => {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.success) {
+                    searchResults.innerHTML = data.html;
+                } else {
+                    throw new Error(data.message || 'Không tìm thấy kết quả');
+                }
+            } else {
+                const html = await response.text();
+                searchResults.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            searchResults.innerHTML = `<div class="text-center"><p>Đã xảy ra lỗi: ${error.message}</p></div>`;
+        });
+    }
+
+    // Handle pagination
+    document.body.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        if (target.tagName === 'A' && target.closest('.pagination')) {
+            e.preventDefault();
+            const url = target.getAttribute('href');
+            
+            if (url) {
+                searchResults.innerHTML = '<div class="text-center"><p>Đang tải...</p></div>';
+                
+                fetch(url, {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(async response => {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        throw new Error('Phiên đăng nhập đã hết hạn hoặc có lỗi máy chủ. Vui lòng tải lại trang.');
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        searchResults.innerHTML = data.html;
+                    } else {
+                        throw new Error(data.message || 'Đã xảy ra lỗi');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    if (error.message.includes('Phiên đăng nhập đã hết hạn') || error.message.includes('máy chủ')) {
+                        searchResults.innerHTML = `<div class=\"text-center\"><p>Phiên đăng nhập đã hết hạn hoặc có lỗi máy chủ.<br><button id='reloadPageBtn' style='margin-top:8px;padding:6px 16px;background:#3490dc;color:#fff;border:none;border-radius:4px;cursor:pointer;'>Tải lại trang</button></p></div>`;
+                        setTimeout(function() {
+                            const reloadBtn = document.getElementById('reloadPageBtn');
+                            if (reloadBtn) reloadBtn.onclick = function() { location.reload(); };
+                        }, 100);
+                    } else {
+                        searchResults.innerHTML = `<div class=\"text-center\"><p>Đã xảy ra lỗi: ${error.message}</p></div>`;
+                    }
+                });
+            }
+        }
+    });
+});
 </script>
 @endsection

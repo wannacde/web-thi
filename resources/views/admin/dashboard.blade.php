@@ -27,11 +27,6 @@
     
     <div class="dashboard-actions">
         <div class="action-card">
-            <h2>Quản lý người dùng</h2>
-            <p>Thêm, sửa, xóa người dùng trong hệ thống</p>
-            <a href="#" class="btn-primary">Quản lý người dùng</a>
-        </div>
-        <div class="action-card">
             <h2>Quản lý môn học</h2>
             <p>Thêm, sửa, xóa môn học và chương</p>
             <a href="{{ route('subjects.index') }}" class="btn-primary">Quản lý môn học</a>
@@ -44,7 +39,7 @@
         <div class="action-card">
             <h2>Quản lý bài thi</h2>
             <p>Thêm, sửa, xóa bài thi</p>
-            <a href="{{ route('exam.list') }}" class="btn-primary">Quản lý bài thi</a>
+            <a href="{{ route('exams.index') }}" class="btn-primary">Quản lý bài thi</a>
         </div>
         <div class="action-card">
             <h2>Thống kê kết quả</h2>

@@ -1,6 +1,6 @@
 <?php
 // routes/web.php
-
+use App\Http\Controllers\RandomExamController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\HomeController;
@@ -27,36 +27,39 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard')->middleware('role:quan_tri');
     Route::get('/teacher/dashboard', [HomeController::class, 'teacherDashboard'])->name('teacher.dashboard')->middleware('role:giao_vien');
     
-    // QUAN TRỌNG: Đặt route create trước route detail để tránh xung đột
+   
     // Route cho quản lý bài thi (chỉ admin và giáo viên)
     Route::middleware('role:quan_tri,giao_vien')->group(function () {
-        Route::get('/exams/create', [ExamController::class, 'create'])->name('exam.create');
-        Route::post('/exams', [ExamController::class, 'store'])->name('exam.store');
-        Route::get('/exams/{id}/edit', [ExamController::class, 'edit'])->name('exam.edit');
-        Route::put('/exams/{id}', [ExamController::class, 'update'])->name('exam.update');
-        Route::delete('/exams/{id}', [ExamController::class, 'destroy'])->name('exam.destroy');
+        Route::get('/bai-thi/tao-moi', [ExamController::class, 'create'])->name('exams.create');
+        Route::post('/bai-thi', [ExamController::class, 'store'])->name('exams.store');
+        Route::get('/bai-thi/{slug}/sua', [ExamController::class, 'edit'])->name('exams.edit');
+        Route::put('/bai-thi/{slug}', [ExamController::class, 'update'])->name('exams.update');
+        Route::delete('/bai-thi/{slug}', [ExamController::class, 'destroy'])->name('exams.destroy');
     });
     
     // Route cho bài thi
-    Route::get('/exams', [ExamController::class, 'index'])->name('exam.list');
-    Route::get('/exams/{id}', [ExamController::class, 'showDetail'])->name('exam.detail');
-    Route::get('/exams/{id}/take', [ExamController::class, 'takeExam'])->name('exam.take')->middleware('role:hoc_sinh');
-    Route::post('/exams/{id}/submit', [ExamController::class, 'submitExam'])->name('exam.submit')->middleware('role:hoc_sinh');
+    Route::get('/bai-thi', [ExamController::class, 'index'])->name('exams.index');
+    Route::get('/bai-thi/{slug}', [ExamController::class, 'show'])->name('exams.show');
+    Route::get('/bai-thi/{slug}/lam-bai', [ExamController::class, 'takeExam'])->name('exams.take')->middleware('role:hoc_sinh');
+    Route::post('/bai-thi/{slug}/nop-bai', [ExamController::class, 'submitExam'])->name('exams.submit')->middleware('role:hoc_sinh');
     
     // Route cho câu hỏi (chỉ admin và giáo viên)
     Route::middleware('role:quan_tri,giao_vien')->group(function () {
-        Route::resource('questions', QuestionController::class);
         Route::get('/chuong/{maMonHoc}', [QuestionController::class, 'getChuongsByMonHoc']);
         Route::get('/questions/by-chuong/{maChuong}', [QuestionController::class, 'getQuestionsByChuong']);
+        Route::get('/questions/search', [QuestionController::class, 'search'])->name('questions.search');
+        Route::resource('questions', QuestionController::class);
     });
     
     // Route cho môn học
     Route::middleware('role:quan_tri,giao_vien')->group(function () {
-        Route::resource('subjects', SubjectController::class);
-        Route::get('/subjects/{id}/chapters', [SubjectController::class, 'manageChapters'])->name('subjects.chapters');
-        Route::post('/subjects/{id}/chapters', [SubjectController::class, 'storeChapter'])->name('subjects.chapters.store');
-        Route::put('/subjects/{id}/chapters/{chapterId}', [SubjectController::class, 'updateChapter'])->name('subjects.chapters.update');
-        Route::delete('/subjects/{id}/chapters/{chapterId}', [SubjectController::class, 'destroyChapter'])->name('subjects.chapters.destroy');
+        Route::resource('subjects', SubjectController::class)->parameters([
+            'subjects' => 'slug'
+        ]);
+        Route::get('/subjects/{slug}/chapters', [SubjectController::class, 'manageChapters'])->name('subjects.chapters');
+        Route::post('/subjects/{slug}/chapters', [SubjectController::class, 'storeChapter'])->name('subjects.chapters.store');
+        Route::put('/subjects/{slug}/chapters/{chapterId}', [SubjectController::class, 'updateChapter'])->name('subjects.chapters.update');
+        Route::delete('/subjects/{slug}/chapters/{chapterId}', [SubjectController::class, 'destroyChapter'])->name('subjects.chapters.destroy');
     });
     
     // Route cho kết quả
@@ -68,4 +71,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:quan_tri,giao_vien')->group(function () {
         Route::get('/statistics', [ResultController::class, 'statistics'])->name('results.statistics');
     });
+
+    // Route cho bài thi ngẫu nhiên
+    Route::get('/random-exam/chapter-question-count', [RandomExamController::class, 'getChapterQuestionCount'])->name('random-exam.chapter-question-count');
+    Route::post('/random-exam/create', [RandomExamController::class, 'create'])->name('random-exam.create');
+    Route::post('/random-exam/generate-questions', [RandomExamController::class, 'generateQuestions'])->name('random-exam.generate-questions');
 });

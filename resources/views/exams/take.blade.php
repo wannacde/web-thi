@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <form id="examForm" method="POST" action="{{ route('exam.submit', $exam->ma_bai_thi) }}">
+    <form id="examForm" method="POST" action="{{ route('exams.submit', $exam->slug) }}">
         @csrf
         
         <div class="questions-container">

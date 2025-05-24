@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('subjects.chapters.store', $subject->ma_mon_hoc) }}">
+        <form method="POST" action="{{ route('subjects.chapters.store', $subject->slug) }}">
             @csrf
             
             <div class="form-group">
@@ -86,7 +86,7 @@
                             <td>
                                 <button type="button" class="btn-primary edit-chapter" data-id="{{ $chapter->ma_chuong }}" data-name="{{ $chapter->ten_chuong }}" data-level="{{ $chapter->muc_do }}" data-order="{{ $chapter->so_thu_tu }}" data-desc="{{ $chapter->mo_ta }}">Sửa</button>
                                 
-                                <form action="{{ route('subjects.chapters.destroy', [$subject->ma_mon_hoc, $chapter->ma_chuong]) }}" method="POST" style="display: inline;">
+                                <form action="{{ route('subjects.chapters.destroy', [$subject->slug, $chapter->ma_chuong]) }}" method="POST" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa chương này?')">Xóa</button>
@@ -243,7 +243,7 @@
                 document.getElementById('edit_mo_ta').value = chapterDesc;
                 
                 // Cập nhật action của form
-                editForm.action = `{{ route('subjects.chapters.update', [$subject->ma_mon_hoc, '']) }}/${chapterId}`;
+                editForm.action = `{{ route('subjects.chapters.update', [$subject->slug, '']) }}/${chapterId}`;
                 
                 // Hiển thị modal
                 modal.style.display = 'block';

@@ -6,15 +6,10 @@
     <div class="exam-header">
         <h1>{{ $exam->ten_bai_thi }}</h1>
         <div class="exam-actions">
-            @if(Auth::user()->vai_tro == 'hoc_sinh')
-                <a href="{{ route('exam.take', $exam->ma_bai_thi) }}" class="btn-primary">Làm bài</a>
-            @endif
-            
             @if(Auth::user()->vai_tro != 'hoc_sinh' && 
                 (Auth::user()->vai_tro == 'quan_tri' || Auth::user()->ma_nguoi_dung == $exam->nguoi_tao))
-                <a href="{{ route('exam.edit', $exam->ma_bai_thi) }}" class="btn-primary">Sửa</a>
-                
-                <form action="{{ route('exam.destroy', $exam->ma_bai_thi) }}" method="POST" style="display: inline;">
+                <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary">Sửa</a>
+                <form action="{{ route('exams.destroy', $exam->slug) }}" method="POST" style="display: inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')">Xóa</button>
@@ -101,7 +96,7 @@
             </ul>
             
             <div class="start-exam">
-                <a href="{{ route('exam.take', $exam->ma_bai_thi) }}" class="btn-primary">Làm bài</a>
+                <a href="{{ route('exams.take', $exam->slug) }}" class="btn-primary">Làm bài</a>
             </div>
         </div>
     @endif

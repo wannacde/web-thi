@@ -63,91 +63,82 @@ class SubjectController extends Controller
     /**
      * Hiển thị chi tiết môn học
      */
-    public function show($id)
+    public function show($slug)
     {
         // Chỉ admin và giáo viên mới có quyền xem chi tiết môn học
         if (Auth::user()->vai_tro == 'hoc_sinh') {
             return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
         }
-        
-        $subject = MonHoc::with('chuong')->findOrFail($id);
+        $subject = MonHoc::with('chuong')->where('slug', $slug)->firstOrFail();
         return view('subjects.show', compact('subject'));
     }
 
     /**
      * Hiển thị form chỉnh sửa môn học
      */
-    public function edit($id)
+    public function edit($slug)
     {
         // Chỉ admin mới có quyền chỉnh sửa môn học
         if (Auth::user()->vai_tro != 'quan_tri') {
             return redirect()->route('subjects.index')->with('error', 'Bạn không có quyền chỉnh sửa môn học!');
         }
-        
-        $subject = MonHoc::findOrFail($id);
+        $subject = MonHoc::where('slug', $slug)->firstOrFail();
         return view('subjects.edit', compact('subject'));
     }
 
     /**
      * Cập nhật môn học
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
         // Chỉ admin mới có quyền chỉnh sửa môn học
         if (Auth::user()->vai_tro != 'quan_tri') {
             return redirect()->route('subjects.index')->with('error', 'Bạn không có quyền chỉnh sửa môn học!');
         }
-        
+        $subject = MonHoc::where('slug', $slug)->firstOrFail();
         $request->validate([
-            'ten_mon_hoc' => 'required|string|max:100|unique:MonHoc,ten_mon_hoc,'.$id.',ma_mon_hoc',
+            'ten_mon_hoc' => 'required|string|max:100|unique:MonHoc,ten_mon_hoc,'.$subject->ma_mon_hoc.',ma_mon_hoc',
             'mo_ta' => 'nullable|string',
         ]);
-        
-        $subject = MonHoc::findOrFail($id);
         $subject->update([
             'ten_mon_hoc' => $request->ten_mon_hoc,
             'mo_ta' => $request->mo_ta,
         ]);
-        
         return redirect()->route('subjects.index')->with('success', 'Môn học đã được cập nhật thành công!');
     }
 
     /**
      * Xóa môn học
      */
-    public function destroy($id)
+    public function destroy($slug)
     {
         // Chỉ admin mới có quyền xóa môn học
         if (Auth::user()->vai_tro != 'quan_tri') {
             return redirect()->route('subjects.index')->with('error', 'Bạn không có quyền xóa môn học!');
         }
-        
+        $subject = MonHoc::where('slug', $slug)->firstOrFail();
         // Kiểm tra xem môn học có đang được sử dụng không
-        $hasChapters = Chuong::where('ma_mon_hoc', $id)->exists();
-        $hasExams = \App\Models\BaiThi::where('ma_mon_hoc', $id)->exists();
-        
+        $hasChapters = Chuong::where('ma_mon_hoc', $subject->ma_mon_hoc)->exists();
+        $hasExams = \App\Models\BaiThi::where('ma_mon_hoc', $subject->ma_mon_hoc)->exists();
         if ($hasChapters || $hasExams) {
             return redirect()->route('subjects.index')->with('error', 'Không thể xóa môn học đang được sử dụng!');
         }
-        
-        MonHoc::destroy($id);
+        $subject->delete();
         return redirect()->route('subjects.index')->with('success', 'Môn học đã được xóa thành công!');
     }
     
     /**
      * Quản lý chương của môn học
      */
-    public function manageChapters($id)
+    public function manageChapters($slug)
     {
         // Chỉ admin và giáo viên mới có quyền quản lý chương
         if (Auth::user()->vai_tro == 'hoc_sinh') {
             return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này!');
         }
-        
         $subject = MonHoc::with(['chuong' => function($query) {
             $query->orderBy('so_thu_tu', 'asc');
-        }])->findOrFail($id);
-        
+        }])->where('slug', $slug)->firstOrFail();
         return view('subjects.chapters', compact('subject'));
     }
     

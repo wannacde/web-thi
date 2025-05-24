@@ -21,7 +21,7 @@
                     <td>{{ $baiThi->ten_bai_thi }}</td>
                     <td>{{ $baiThi->thoi_gian }} phút</td>
                     <td>
-                        <a href="{{ route('exams.detail', $baiThi->ma_bai_thi) }}">Xem Chi Tiết</a>
+                        <a href="{{ route('exams.show', $baiThi->slug) }}">Xem Chi Tiết</a>
                     </td>
                 </tr>
             @endforeach

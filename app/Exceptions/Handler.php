@@ -27,4 +27,17 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($request->expectsJson() || $request->isXmlHttpRequest()) {
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                return response()->json(['error' => 'Chưa đăng nhập'], 401);
+            }
+            if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+                return response()->json(['error' => 'Không có quyền truy cập'], 403);
+            }
+        }
+        return parent::render($request, $exception);
+    }
 }

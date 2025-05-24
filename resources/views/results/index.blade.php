@@ -28,12 +28,14 @@
                     @foreach($results as $index => $result)
                         <tr>
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $result->baiThi->ten_bai_thi }}</td>
-                            <td>{{ $result->baiThi->monHoc->ten_mon_hoc }}</td>
+                            <td>{{ $result->baiThi ? $result->baiThi->ten_bai_thi : '[Bài thi đã bị xóa]' }}</td>
+                            <td>{{ $result->baiThi && $result->baiThi->monHoc ? $result->baiThi->monHoc->ten_mon_hoc : '' }}</td>
                             <td>{{ number_format($result->diem, 1) }}</td>
                             <td>{{ \Carbon\Carbon::parse($result->ngay_nop)->format('d/m/Y H:i') }}</td>
                             <td>
-                                <a href="{{ route('results.show', $result->ma_ket_qua) }}" class="btn-primary">Chi tiết</a>
+                                @if($result->baiThi)
+                                    <a href="{{ route('results.show', $result->ma_ket_qua) }}" class="btn-primary">Chi tiết</a>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

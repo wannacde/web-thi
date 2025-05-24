@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('subjects.update', $subject->ma_mon_hoc) }}">
+    <form method="POST" action="{{ route('subjects.update', $subject->slug) }}">
         @csrf
         @method('PUT')
         
