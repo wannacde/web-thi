@@ -10,7 +10,7 @@
 
     <div class="questions-filters">
         <select id="subjectFilter" class="filter-select">
-            <option value="">Tất cả môn học</option>
+            <option value=""><i class="fas fa-book"></i> Tất cả môn học</option>
             @foreach($subjects as $subject)
                 <option value="{{ $subject->ma_mon_hoc }}">
                     {{ $subject->ten_mon_hoc }}
@@ -19,22 +19,23 @@
         </select>
         
         <select id="chapterFilter" class="filter-select" disabled>
-            <option value="">Tất cả chương</option>
+            <option value=""><i class="fas fa-layer-group"></i> Tất cả chương</option>
         </select>
         
         <select id="typeFilter" class="filter-select">
-            <option value="">Tất cả loại</option>
+            <option value=""><i class="fas fa-filter"></i> Tất cả loại</option>
             <option value="trac_nghiem">Trắc nghiệm</option>
             <option value="dien_khuyet">Điền khuyết</option>
         </select>
         
-        <input type="text" id="searchQuestion" placeholder="Tìm kiếm câu hỏi..." class="search-input">
-        
-        <button id="searchButton" class="btn-primary">Tìm kiếm</button>
+        <div class="search-container">
+            <input type="text" id="searchQuestion" placeholder="Tìm kiếm câu hỏi..." class="search-input">
+            <button id="searchButton" class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
     </div>
 
     <div id="searchResults">
-        @include('questions.partials.question-list')
+        @include('questions.partials.question-list-updated')
     </div>
 @endsection
 
@@ -48,13 +49,65 @@
         font-family: 'Montserrat', Arial, sans-serif;
         background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
     }
-    .questions-list li {
-        background: #fff;
-        border-left: 4px solid #3490dc;
+    .questions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(52,144,220,0.08);
-        padding: 1rem 1.5rem;
+    }
+    .questions-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+    .questions-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .search-input, .filter-select {
+        padding: 0.7rem 1rem;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-family: 'Montserrat', sans-serif;
+        transition: all 0.2s;
+    }
+    .filter-select {
+        min-width: 150px;
+        cursor: pointer;
+    }
+    .search-container {
+        display: flex;
+        flex-grow: 1;
+        position: relative;
+    }
+    .search-input {
+        flex-grow: 1;
+        padding-right: 40px;
+    }
+    .search-btn {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 40px;
+        background: none;
+        border: none;
+        color: #3490dc;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+    .search-input:focus, .filter-select:focus {
+        outline: none;
+        border-color: #3490dc;
+        box-shadow: 0 0 0 3px rgba(52,144,220,0.2);
     }
     .btn-primary {
         background-color: #3490dc;
@@ -74,39 +127,6 @@
         background-color: #2779bd;
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(52,144,220,0.2);
-    }
-    .questions-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-    .questions-filters {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        align-items: center;
-    }
-    .search-input, .filter-select {
-        padding: 0.7rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        font-family: 'Montserrat', sans-serif;
-        transition: all 0.2s;
-    }
-    .filter-select {
-        min-width: 150px;
-        cursor: pointer;
-    }
-    .search-input {
-        flex-grow: 1;
-    }
-    .search-input:focus, .filter-select:focus {
-        outline: none;
-        border-color: #3490dc;
-        box-shadow: 0 0 0 3px rgba(52,144,220,0.2);
     }
     .list-questions {
         list-style-type: none;
@@ -130,6 +150,12 @@
     }
     .question-content {
         flex-grow: 1;
+    }
+    .question-content h3 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        color: #2d3748;
+        font-size: 1.2rem;
     }
     .question-meta {
         margin: 0.5rem 0;
@@ -171,57 +197,62 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(52,144,220,0.2);
     }
-    .inline-form {
-        display: inline;
-    }
     .answers {
-        margin-top: 0.75rem;
+        margin-top: 1rem;
+        background-color: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    .answers strong {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #2d3748;
     }
     .answers ul {
         list-style-type: none;
-        padding-left: 1rem;
-        margin-top: 0.5rem;
+        padding-left: 1.5rem;
+        margin-top: 0.8rem;
     }
     .answers li {
-        margin-bottom: 0.25rem;
-        padding: 0.25rem 0.5rem;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 0.8rem;
         background-color: #fff;
-        border-radius: 4px;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .correct-answer {
-        background-color: #d4edda;
+        background-color: #d4edda !important;
+        border-left: 3px solid #28a745;
     }
     .correct-badge {
         background-color: #28a745;
         color: white;
-        padding: 0.1rem 0.25rem;
+        padding: 0.2rem 0.5rem;
         border-radius: 4px;
         margin-left: 0.5rem;
         font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
     }
     .pagination {
         margin-top: 2rem;
-        margin-bottom: 3rem;
         display: flex;
         justify-content: center;
-        gap: 5px;
-        position: relative;
-        z-index: 1;
     }
     .pagination nav {
         display: flex;
         justify-content: center;
         border: none !important;
         background: none !important;
-        position: relative;
-        z-index: 1;
     }
     .pagination ul {
         display: flex;
         list-style: none !important;
         padding: 0;
         margin: 0;
-        gap: 5px;
+        gap: 0.5rem;
     }
     .pagination li {
         list-style: none !important;
@@ -231,24 +262,28 @@
         content: none !important;
     }
     .pagination .page-link {
-        padding: 5px 10px;
-        color: #333;
+        padding: 0.5rem 1rem;
+        color: #3490dc;
         text-decoration: none;
         background: #fff;
-        border-radius: 4px;
+        border-radius: 8px;
         display: inline-block;
-        min-width: 35px;
+        min-width: 40px;
         text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+    }
+    .pagination .page-link:hover {
+        background: #e6f0ff;
     }
     .pagination .page-item.active .page-link {
-        font-weight: bold;
-        color: #007bff !important;
-        background: #e6f0ff;
+        background: #3490dc;
+        color: #fff !important;
     }
     .pagination .page-item.disabled .page-link {
         color: #ccc;
         pointer-events: none;
+        background: #f8fafc;
     }
     #searchResults {
         min-height: 200px;
@@ -266,12 +301,15 @@
         font-size: 1.2rem;
         font-weight: 600;
     }
+    .inline-form {
+        display: inline;
+    }
     @media (max-width: 768px) {
         .questions-filters {
             flex-direction: column;
             align-items: stretch;
         }
-        .search-input {
+        .search-container {
             width: 100%;
         }
         .question-item {
@@ -304,14 +342,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!selectedSubject) {
             chapterFilter.disabled = true;
-            chapterFilter.innerHTML = '<option value="">Tất cả chương</option>';
+            chapterFilter.innerHTML = '<option value=""><i class="fas fa-layer-group"></i> Tất cả chương</option>';
             return;
         }
         
         fetch(`/chuong/${selectedSubject}`)
             .then(response => response.json())
             .then(chuongs => {
-                let options = '<option value="">Tất cả chương</option>';
+                let options = '<option value=""><i class="fas fa-layer-group"></i> Tất cả chương</option>';
                 chuongs.forEach(chuong => {
                     options += `<option value="${chuong.ma_chuong}">${chuong.ten_chuong}</option>`;
                 });
@@ -364,14 +402,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 if (data.success) {
                     searchResults.innerHTML = data.html;
-                    setupPaginationLinks();
                 } else {
                     throw new Error(data.message || 'Không tìm thấy kết quả');
                 }
             } else {
                 const html = await response.text();
                 searchResults.innerHTML = html;
-                setupPaginationLinks();
             }
         })
         .catch(error => {
@@ -380,20 +416,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Setup pagination links with AJAX
-
-function setupPaginationLinks() {
-    // Chọn tất cả các liên kết phân trang trong trang, không chỉ trong #searchResults
-    const paginationLinks = document.querySelectorAll('.pagination a');
-    
-    paginationLinks.forEach(link => {
-        // Xóa tất cả event listeners cũ để tránh trùng lặp
-        const clonedLink = link.cloneNode(true);
-        link.parentNode.replaceChild(clonedLink, link);
+    // Handle pagination
+    document.body.addEventListener('click', function(e) {
+        const target = e.target;
         
-        clonedLink.addEventListener('click', function(e) {
+        if (target.tagName === 'A' && target.closest('.pagination')) {
             e.preventDefault();
-            const url = this.getAttribute('href');
+            const url = target.getAttribute('href');
             
             if (url) {
                 searchResults.innerHTML = '<div class="text-center"><p>Đang tải...</p></div>';
@@ -410,14 +439,12 @@ function setupPaginationLinks() {
                         const data = await response.json();
                         if (data.success) {
                             searchResults.innerHTML = data.html;
-                            setupPaginationLinks(); // Re-setup for new pagination links
                         } else {
                             throw new Error(data.message || 'Đã xảy ra lỗi');
                         }
                     } else {
                         const html = await response.text();
                         searchResults.innerHTML = html;
-                        setupPaginationLinks(); // Re-setup for new pagination links
                     }
                 })
                 .catch(error => {
@@ -425,12 +452,8 @@ function setupPaginationLinks() {
                     searchResults.innerHTML = `<div class="text-center"><p>Đã xảy ra lỗi: ${error.message}</p></div>`;
                 });
             }
-        });
+        }
     });
-}
-
-    setupPaginationLinks();
-    performSearch();
 });
 </script>
 @endsection

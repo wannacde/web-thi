@@ -63,10 +63,11 @@
                         <div class="answer-input-group">
                             <input type="text" name="dap_an[0][noi_dung]" placeholder="Nội dung đáp án" required>
                             <div class="radio-group">
-                                <input type="radio" name="correct_answer" value="0" checked>
+                                <input type="radio" name="correct_answer" value="0" checked onchange="updateDungSai(this)">
                                 <label>Đáp án đúng</label>
                             </div>
                         </div>
+                        <input type="hidden" name="dap_an[0][dung_sai]" value="1" id="dung_sai_0">
                     </div>
                 </div>
                 <div class="answer-item">
@@ -75,10 +76,11 @@
                         <div class="answer-input-group">
                             <input type="text" name="dap_an[1][noi_dung]" placeholder="Nội dung đáp án" required>
                             <div class="radio-group">
-                                <input type="radio" name="correct_answer" value="1">
+                                <input type="radio" name="correct_answer" value="1" onchange="updateDungSai(this)">
                                 <label>Đáp án đúng</label>
                             </div>
                         </div>
+                        <input type="hidden" name="dap_an[1][dung_sai]" value="0" id="dung_sai_1">
                     </div>
                 </div>
                 <div id="more-answers"></div>
@@ -164,6 +166,19 @@
 
 @section('scripts')
 <script>
+    function updateDungSai(radio) {
+        // Reset all to 0
+        for (let i = 0; i < 10; i++) {
+            const input = document.getElementById('dung_sai_' + i);
+            if (input) input.value = '0';
+        }
+        
+        // Set selected to 1
+        const selectedIndex = radio.value;
+        const selectedInput = document.getElementById('dung_sai_' + selectedIndex);
+        if (selectedInput) selectedInput.value = '1';
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var form = document.getElementById('createQuestionForm');
         if (!form) {
@@ -184,7 +199,6 @@
         }
         
         let answerCount = 2;
-        let submitting = false;
         
         // Handle subject change
         monHocSelect.addEventListener('change', function() {
@@ -195,15 +209,16 @@
             fetch(`/chuong/${monHocId}`, {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => {
+            .then(async response => {
                 const contentType = response.headers.get('content-type');
-                if (contentType && contentType.indexOf('application/json') !== -1) {
+                if (contentType && contentType.includes('application/json')) {
                     return response.json();
                 } else {
-                    return response.text().then(text => { throw new Error('Server trả về không phải JSON: ' + text.substring(0, 200)); });
+                    const html = await response.text();
+                    throw new Error('Server trả về không phải JSON');
                 }
             })
             .then(chuongs => {
@@ -217,28 +232,7 @@
                 chuongSelect.disabled = false;
             })
             .catch(error => {
-                if (error.message.includes('Phiên đăng nhập đã hết hạn') || error.message.includes('Server trả về không phải JSON')) {
-                    // Xóa thông báo cũ nếu có
-                    const oldErrorDiv = document.getElementById('sessionErrorDiv');
-                    if (oldErrorDiv) oldErrorDiv.remove();
-                    // Hiển thị thông báo đẹp với nút reload
-                    const errorDiv = document.createElement('div');
-                    errorDiv.id = 'sessionErrorDiv';
-                    errorDiv.style.background = '#f8d7da';
-                    errorDiv.style.color = '#721c24';
-                    errorDiv.style.padding = '1rem';
-                    errorDiv.style.borderRadius = '4px';
-                    errorDiv.style.margin = '1rem 0';
-                    errorDiv.innerHTML = `
-                        <strong>Phiên đăng nhập đã hết hạn hoặc có lỗi máy chủ.</strong><br>
-                        <button id="reloadPageBtn" style="margin-top:8px;padding:6px 16px;background:#3490dc;color:#fff;border:none;border-radius:4px;cursor:pointer;">Tải lại trang</button>
-                    `;
-                    form.style.display = 'none';
-                    form.parentNode.insertBefore(errorDiv, form);
-                    document.getElementById('reloadPageBtn').onclick = function() { location.reload(); };
-                } else {
-                    alert('Lỗi khi tải chương: ' + error.message);
-                }
+                alert('Lỗi khi tải chương: ' + error.message);
                 chuongSelect.disabled = true;
             });
         });
@@ -259,7 +253,6 @@
 
         // Add new answer
         addAnswerBtn.addEventListener('click', function() {
-            const checkedAttr = tracNghiemContainer.querySelector('input[type="radio"][name="correct_answer"]:checked') ? '' : 'checked';
             const answerItem = document.createElement('div');
             answerItem.className = 'answer-item';
             answerItem.innerHTML = `
@@ -268,68 +261,34 @@
                     <div class="answer-input-group">
                         <input type="text" name="dap_an[${answerCount}][noi_dung]" placeholder="Nội dung đáp án" required>
                         <div class="radio-group">
-                            <input type="radio" name="correct_answer" value="${answerCount}" ${checkedAttr}>
+                            <input type="radio" name="correct_answer" value="${answerCount}" onchange="updateDungSai(this)">
                             <label>Đáp án đúng</label>
                         </div>
                     </div>
+                    <input type="hidden" name="dap_an[${answerCount}][dung_sai]" value="0" id="dung_sai_${answerCount}">
                 </div>
             `;
             moreAnswersContainer.appendChild(answerItem);
             answerCount++;
         });
         
-        // Handle form submit
+        // Handle form submit - đơn giản hóa
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (submitting) return;
-            submitting = true;
-
-            if (loaiCauHoiSelect.value.trim() === 'trac_nghiem') {
-                // Đảm bảo luôn có radio được chọn khi submit
-                let radios = tracNghiemContainer.querySelectorAll('input[type="radio"][name="correct_answer"]');
-                if (radios.length > 0 && !tracNghiemContainer.querySelector('input[type="radio"][name="correct_answer"]:checked')) {
-                    radios[0].checked = true;
-                }
-                // Kiểm tra required của form
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    submitting = false;
-                    return;
-                }
-                const correctAnswer = document.querySelector('input[name="correct_answer"]:checked');
-                if (!correctAnswer) {
-                    alert('Vui lòng chọn đáp án đúng!');
-                    submitting = false;
-                    return;
-                }
-                document.querySelectorAll('input[name$="[dung_sai]"]')?.forEach(input => input.remove());
-                const answers = document.querySelectorAll('input[type="text"][name^="dap_an["][name$="][noi_dung]"]');
-                answers.forEach((answer) => {
-                    const match = answer.name.match(/dap_an\[(\d+)\]\[noi_dung\]/);
-                    if (!match) return;
-                    const idx = match[1];
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = `dap_an[${idx}][dung_sai]`;
-                    hiddenInput.value = (String(idx) === String(correctAnswer.value)) ? '1' : '0';
-                    this.appendChild(hiddenInput);
-                });
-                this.submit();
-            } else if (loaiCauHoiSelect.value.trim() === 'dien_khuyet') {
-                // Kiểm tra required của form
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    submitting = false;
-                    return;
-                }
-                this.submit();
-            } else {
-                // fallback: just submit
-                this.submit();
+            // Chỉ kiểm tra required của form
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                form.reportValidity();
+                return;
             }
         });
     });
+    
     // Khi load trang, trigger sự kiện change để render đúng input đáp án
-    loaiCauHoiSelect.dispatchEvent(new Event('change'));
+    document.addEventListener('DOMContentLoaded', function() {
+        const loaiCauHoiSelect = document.getElementById('loai_cau_hoi');
+        if (loaiCauHoiSelect) {
+            loaiCauHoiSelect.dispatchEvent(new Event('change'));
+        }
+    });
 </script>
 @endsection
