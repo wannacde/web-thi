@@ -64,3 +64,106 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## How to use 
+Hướng dẫn cài đặt với Laragon
+Clone repository vào thư mục www của Laragon:
+
+cd C:\laragon\www
+git clone <repository-url> webthitructuyen
+
+Copy
+Cài đặt dependencies:
+
+cd webthitructuyen
+composer install
+
+Copy
+Tạo file .env:
+
+Copy file .env.example thành .env
+
+Hoặc tạo file .env mới với nội dung cơ bản:
+
+APP_NAME="Hệ thống thi trực tuyến"
+APP_ENV=local
+APP_KEY=base64:F+KayPpOOq2ewSKGlWlxu5f6ZBX3HqRqK7LJOON5AXM=
+APP_DEBUG=true
+APP_URL=http://webthitructuyen.test
+
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=web
+DB_USERNAME=root
+DB_PASSWORD=
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-email@gmail.com
+MAIL_FROM_NAME="Hệ thống thi trực tuyến"
+
+
+Copy
+Tạo database:
+
+Mở Laragon và click vào "Database" để mở HeidiSQL
+
+Tạo database mới tên là "web" (hoặc tên khác nếu đã cấu hình trong .env)
+
+Chạy migration và seeder:
+
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+php artisan storage:link
+
+Copy
+Khởi động website:
+
+Khởi động Laragon (nếu chưa chạy)
+
+Click vào "Start All"
+
+Truy cập website tại: http://webthitructuyen.test
+
+Xóa cache nếu cần:
+
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
+php artisan view:clear
+
+Copy
+Lưu ý quan trọng cho người dùng Laragon:
+Virtual Host: Laragon tự động tạo virtual host dựa trên tên thư mục. Nếu thư mục là "webthitructuyen", URL sẽ là http://webthitructuyen.test
+
+Cấu hình .env:
+
+Đảm bảo APP_URL trỏ đến virtual host: APP_URL=http://webthitructuyen.test
+
+Không cần các cấu hình Expose như SESSION_DOMAIN và SANCTUM_STATEFUL_DOMAINS
+
+Cấu hình MySQL:
+
+Laragon thường sử dụng MySQL với username "root" và password trống
+
+Đảm bảo cấu hình database trong .env phù hợp
+
+Quyền thư mục:
+
+Laragon thường không gặp vấn đề về quyền thư mục, nhưng nếu có lỗi, đảm bảo thư mục storage và bootstrap/cache có quyền ghi
+
+SSL (nếu cần):
+
+Laragon có thể tạo SSL tự ký bằng cách click chuột phải vào icon Laragon > Apache > SSL > Enable
+
+Sau đó URL sẽ là https://webthitructuyen.test
