@@ -524,7 +524,7 @@
         background-color: #4b5563;
         transform: translateY(-2px);
     }
-    
+     
     /* Modal */
     .modal {
         display: none;

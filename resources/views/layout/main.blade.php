@@ -243,17 +243,20 @@
     <nav>
         <a href="{{ url('/') }}" class="logo"><i class="fa fa-graduation-cap"></i>Hệ thống thi trực tuyến</a>
         <div>
-            <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
+            
             @guest
                 <a href="{{ route('login.view') }}"><i class="fa fa-sign-in-alt"></i>Đăng nhập</a>
                 <a href="{{ route('register.view') }}"><i class="fa fa-user-plus"></i>Đăng ký</a>
                 <a href="{{ route('password.request') }}"><i class="fa fa-key"></i>Quên mật khẩu</a>
             @else
                 @if(Auth::user()->vai_tro == 'quan_tri')
+                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('admin.dashboard') }}"><i class="fa fa-user-shield"></i>Dashboard</a>
                 @elseif(Auth::user()->vai_tro == 'giao_vien')
+                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('teacher.dashboard') }}"><i class="fa fa-chalkboard-teacher"></i>Dashboard</a>
                 @endif
+                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                 <a href="{{ route('results.index') }}"><i class="fa fa-poll"></i>Kết quả</a>
                 <a href="{{ route('password.change.form') }}"><i class="fa fa-key"></i>Đổi mật khẩu</a>
                 <form action="{{ route('logout') }}" method="POST">
