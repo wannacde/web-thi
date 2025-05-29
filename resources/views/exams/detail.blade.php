@@ -8,11 +8,11 @@
         <div class="exam-actions">
             @if(Auth::user()->vai_tro != 'hoc_sinh' && 
                 (Auth::user()->vai_tro == 'quan_tri' || Auth::user()->ma_nguoi_dung == $exam->nguoi_tao))
-                <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-primary"><i class="fas fa-edit"></i> Sửa</a>
-                <form action="{{ route('exams.destroy', $exam->slug) }}" method="POST" style="display: inline;">
+                <a href="{{ route('exams.edit', $exam->slug) }}" class="btn-action btn-primary"><i class="fas fa-edit"></i> Sửa</a>
+                <form action="{{ route('exams.destroy', $exam->slug) }}" method="POST" class="action-form">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')"><i class="fas fa-trash"></i> Xóa</button>
+                    <button type="submit" class="btn-action btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa bài thi này?')"><i class="fas fa-trash"></i> Xóa</button>
                 </form>
             @endif
         </div>
@@ -401,5 +401,6 @@
         margin-left: 0.5rem;
         font-weight: 600;
     }
+    
 </style>
 @endsection

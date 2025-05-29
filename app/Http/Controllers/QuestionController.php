@@ -338,7 +338,7 @@ public function search(Request $request)
     public function getQuestionsByChuong($maChuong)
     {
         $questions = CauHoi::where('ma_chuong', $maChuong)
-            ->with('dapAn')
+            ->with(['dapAn', 'chuong'])
             ->get();
         return response()->json($questions);
     }

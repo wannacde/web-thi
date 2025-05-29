@@ -250,10 +250,8 @@
                 <a href="{{ route('password.request') }}"><i class="fa fa-key"></i>Quên mật khẩu</a>
             @else
                 @if(Auth::user()->vai_tro == 'quan_tri')
-                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('admin.dashboard') }}"><i class="fa fa-user-shield"></i>Dashboard</a>
                 @elseif(Auth::user()->vai_tro == 'giao_vien')
-                <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>
                     <a href="{{ route('teacher.dashboard') }}"><i class="fa fa-chalkboard-teacher"></i>Dashboard</a>
                 @endif
                 <a href="{{ route('exams.index') }}"><i class="fa fa-list-alt"></i>Bài thi</a>

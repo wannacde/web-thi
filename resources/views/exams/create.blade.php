@@ -66,6 +66,14 @@
 
     <div id="step2-container" style="display: none;">
         <h2>Xác nhận câu hỏi đã chọn</h2>
+        
+        <div class="question-actions">
+            <button type="button" class="btn-secondary" id="add-question-btn">
+                <i class="fas fa-plus"></i> Thêm câu hỏi
+            </button>
+            <span class="question-count-info">Đã chọn: <span id="selected-count">0</span> câu hỏi</span>
+        </div>
+        
         <div id="selected-questions-container">
             <!-- Danh sách câu hỏi đã chọn sẽ được thêm vào đây bằng JavaScript -->
         </div>
@@ -86,6 +94,34 @@
                 <a href="{{ route('exams.index') }}" class="btn-secondary">Hủy</a>
             </div>
         </form>
+    </div>
+    
+    <!-- Modal thêm câu hỏi -->
+    <div id="addQuestionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Thêm câu hỏi</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="chapter-filter">Chọn chương</label>
+                    <select id="chapter-filter" class="form-control">
+                        <option value="">Tất cả chương</option>
+                        <!-- Các chương sẽ được thêm vào đây bằng JavaScript -->
+                    </select>
+                </div>
+                
+                <div id="available-questions-container">
+                    <div class="loading">Đang tải câu hỏi...</div>
+                    <!-- Danh sách câu hỏi có sẵn sẽ được thêm vào đây bằng JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-primary" id="add-selected-questions">Thêm câu hỏi đã chọn</button>
+                <button type="button" class="btn-secondary close-modal">Hủy</button>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -279,10 +315,12 @@
         border-radius: 10px;
         margin-bottom: 0.7rem;
         box-shadow: 0 2px 8px rgba(44,62,80,0.06);
+        position: relative;
     }
     .question-content {
         margin-bottom: 0.5rem;
         font-size: 1.05rem;
+        padding-right: 30px;
     }
     .question-meta {
         font-size: 0.95rem;
@@ -298,6 +336,119 @@
     .answer-item.correct {
         color: #0f5132;
         font-weight: bold;
+    }
+    .remove-question {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.7);
+        border: none;
+        color: #dc3545;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .remove-question:hover {
+        background: #dc3545;
+        color: white;
+    }
+    .question-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .question-count-info {
+        font-size: 1rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: modalFadeIn 0.3s;
+    }
+    @keyframes modalFadeIn {
+        from {opacity: 0; transform: translateY(-30px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    .modal-header {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(90deg, #6c63ff 0%, #74b9ff 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 {
+        margin: 0;
+        font-weight: 600;
+    }
+    .modal-body {
+        padding: 1.5rem;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+    .close {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close:hover {
+        color: #f8f9fa;
+    }
+    .available-question {
+        background: #f8f9fa;
+        border-left: 4px solid #6c63ff;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+        display: flex;
+        align-items: flex-start;
+    }
+    .available-question input[type="checkbox"] {
+        margin-right: 1rem;
+        margin-top: 0.25rem;
+    }
+    #available-questions-container {
+        margin-top: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
     }
     .mt-4 {
         margin-top: 1.5rem;
@@ -447,6 +598,9 @@
             } else {
                 generateBtn.disabled = true;
             }
+            
+            // Cập nhật số lượng câu hỏi tối thiểu
+            document.getElementById('confirm_tong_so_cau').value = tongSoCau;
         }
         
         // Điều chỉnh số lượng câu hỏi đã phân bổ nếu vượt quá tổng số câu hỏi mới
@@ -471,6 +625,17 @@
                 updateTotalAllocated();
             }
         }
+        
+        // Xử lý form xác nhận tạo bài thi
+        document.getElementById('createExamForm').addEventListener('submit', function(e) {
+            const tongSoCau = parseInt(document.getElementById('confirm_tong_so_cau').value) || 0;
+            
+            if (selectedQuestions.length < tongSoCau) {
+                e.preventDefault();
+                alert(`Bạn cần chọn ít nhất ${tongSoCau} câu hỏi cho bài thi này.`);
+                return;
+            }
+        });
         
         // Xử lý form tạo câu hỏi ngẫu nhiên
         generateQuestionsForm.addEventListener('submit', function(e) {
@@ -521,18 +686,6 @@
                     document.getElementById('confirm_ma_mon_hoc').value = document.getElementById('ma_mon_hoc').value;
                     document.getElementById('confirm_tong_so_cau').value = document.getElementById('tong_so_cau').value;
                     document.getElementById('confirm_thoi_gian').value = document.getElementById('thoi_gian').value;
-                    
-                    // Thêm input hidden cho các câu hỏi đã chọn
-                    const selectedQuestionsInputs = document.getElementById('selected-questions-inputs');
-                    selectedQuestionsInputs.innerHTML = '';
-                    
-                    data.questions.forEach((question, index) => {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = `questions[${index}]`;
-                        input.value = question.ma_cau_hoi;
-                        selectedQuestionsInputs.appendChild(input);
-                    });
                 } else {
                     alert('Đã xảy ra lỗi: ' + data.message);
                 }
@@ -546,14 +699,26 @@
             });
         });
         
+        // Biến toàn cục để lưu trữ danh sách câu hỏi đã chọn
+        let selectedQuestions = [];
+        let allChapters = [];
+        let allAvailableQuestions = {};
+        
         // Hiển thị các câu hỏi đã chọn
         function displaySelectedQuestions(questions) {
+            selectedQuestions = questions;
+            updateSelectedQuestions();
+        }
+        
+        // Cập nhật hiển thị câu hỏi đã chọn
+        function updateSelectedQuestions() {
             const container = document.getElementById('selected-questions-container');
             container.innerHTML = '';
             
-            questions.forEach((question, index) => {
+            selectedQuestions.forEach((question, index) => {
                 const questionItem = document.createElement('div');
                 questionItem.className = 'question-item';
+                questionItem.dataset.id = question.ma_cau_hoi;
                 
                 let answersHtml = '';
                 if (question.dap_an && question.dap_an.length > 0) {
@@ -566,6 +731,9 @@
                 }
                 
                 questionItem.innerHTML = `
+                    <button type="button" class="remove-question" data-id="${question.ma_cau_hoi}">
+                        <i class="fas fa-times"></i>
+                    </button>
                     <div class="question-content">
                         <strong>${index + 1}. ${question.noi_dung}</strong>
                     </div>
@@ -578,12 +746,246 @@
                 
                 container.appendChild(questionItem);
             });
+            
+            // Cập nhật số lượng câu hỏi đã chọn
+            document.getElementById('selected-count').textContent = selectedQuestions.length;
+            
+            // Cập nhật các input hidden
+            updateHiddenInputs();
+            
+            // Thêm sự kiện cho các nút xóa
+            document.querySelectorAll('.remove-question').forEach(button => {
+                button.addEventListener('click', function() {
+                    const questionId = this.dataset.id;
+                    removeQuestion(questionId);
+                });
+            });
+        }
+        
+        // Cập nhật các input hidden
+        function updateHiddenInputs() {
+            const selectedQuestionsInputs = document.getElementById('selected-questions-inputs');
+            selectedQuestionsInputs.innerHTML = '';
+            
+            selectedQuestions.forEach((question, index) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `questions[${index}]`;
+                input.value = question.ma_cau_hoi;
+                selectedQuestionsInputs.appendChild(input);
+            });
+        }
+        
+        // Xóa câu hỏi
+        function removeQuestion(questionId) {
+            selectedQuestions = selectedQuestions.filter(q => q.ma_cau_hoi != questionId);
+            updateSelectedQuestions();
         }
         
         // Quay lại bước 1
         backBtn.addEventListener('click', function() {
             step2Container.style.display = 'none';
             step1Container.style.display = 'block';
+        });
+        
+        // Modal thêm câu hỏi
+        const addQuestionBtn = document.getElementById('add-question-btn');
+        const addQuestionModal = document.getElementById('addQuestionModal');
+        const closeModalBtns = document.querySelectorAll('.close, .close-modal');
+        const chapterFilter = document.getElementById('chapter-filter');
+        const addSelectedQuestionsBtn = document.getElementById('add-selected-questions');
+        
+        // Mở modal thêm câu hỏi
+        addQuestionBtn.addEventListener('click', function() {
+            // Hiển thị modal
+            addQuestionModal.style.display = 'block';
+            
+            // Lấy ID môn học từ input hidden, nếu rỗng thì lấy từ select ở bước 1
+            let monHocId = document.getElementById('confirm_ma_mon_hoc').value;
+            if (!monHocId) {
+                // Nếu đang ở bước 1 hoặc hidden input bị rỗng, lấy từ select
+                const selectMonHoc = document.getElementById('ma_mon_hoc');
+                if (selectMonHoc) {
+                    monHocId = selectMonHoc.value;
+                }
+            }
+            console.log("ID môn học:", monHocId); // Thêm log để kiểm tra
+            
+            // Hiển thị thông báo đang tải
+            const container = document.getElementById('available-questions-container');
+            container.innerHTML = '<div class="loading">Đang tải câu hỏi...</div>';
+            
+            // Kiểm tra nếu không có ID môn học
+            if (!monHocId) {
+                container.innerHTML = '<div class="loading">Không tìm thấy ID môn học. Vui lòng thử lại.</div>';
+                return;
+            }
+            
+            // Lấy danh sách chương
+            fetch(`/random-exam/chapter-question-count?mon_hoc_id=${monHocId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(chapters => {
+                    console.log("Chapters loaded:", chapters.length); // Thêm log để kiểm tra
+                    allChapters = chapters;
+                    
+                    // Xóa các option cũ trong filter chương
+                    while (chapterFilter.options.length > 1) {
+                        chapterFilter.remove(1);
+                    }
+                    
+                    // Thêm các chương vào filter
+                    chapters.forEach(chapter => {
+                        const option = document.createElement('option');
+                        option.value = chapter.ma_chuong;
+                        option.textContent = chapter.ten_chuong;
+                        chapterFilter.appendChild(option);
+                    });
+                    
+                    // Lấy tất cả câu hỏi từ các chương
+                    const promises = chapters.map(chapter => 
+                        fetch(`/questions/by-chuong/${chapter.ma_chuong}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`Error fetching questions for chapter ${chapter.ma_chuong}`);
+                                }
+                                return response.json();
+                            })
+                            .then(questions => {
+                                // Lưu câu hỏi theo chương
+                                allAvailableQuestions[chapter.ma_chuong] = questions;
+                                return questions;
+                            })
+                            .catch(error => {
+                                console.error(error);
+                                return []; // Trả về mảng rỗng nếu có lỗi
+                            })
+                    );
+                    
+                    Promise.all(promises)
+                        .then(results => {
+                            console.log("All questions loaded"); // Thêm log để kiểm tra
+                            filterAvailableQuestions();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching questions:', error);
+                            container.innerHTML = '<div class="loading">Đã xảy ra lỗi khi tải câu hỏi.</div>';
+                        });
+                })
+                .catch(error => {
+                    console.error('Error fetching chapters:', error);
+                    container.innerHTML = '<div class="loading">Đã xảy ra lỗi khi tải chương.</div>';
+                });
+        });
+       
+        // Đóng modal
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                addQuestionModal.style.display = 'none';
+            });
+        });
+        
+        // Đóng modal khi click bên ngoài
+        window.addEventListener('click', function(event) {
+            if (event.target == addQuestionModal) {
+                addQuestionModal.style.display = 'none';
+            }
+        });
+        
+        // Lọc câu hỏi theo chương
+        chapterFilter.addEventListener('change', function() {
+            filterAvailableQuestions();
+        });
+
+        // Lọc câu hỏi theo chương
+        function filterAvailableQuestions() {
+            const chapterId = chapterFilter.value;
+            const container = document.getElementById('available-questions-container');
+            
+            container.innerHTML = '';
+            
+            let filteredQuestions = [];
+            
+            // Nếu không chọn chương, hiển thị tất cả câu hỏi
+            if (!chapterId) {
+                Object.values(allAvailableQuestions).forEach(questions => {
+                    filteredQuestions = filteredQuestions.concat(questions);
+                });
+            } else {
+                // Nếu chọn chương, chỉ hiển thị câu hỏi của chương đó
+                filteredQuestions = allAvailableQuestions[chapterId] || [];
+            }
+            
+            if (filteredQuestions.length === 0) {
+                container.innerHTML = '<div class="loading">Không có câu hỏi nào.</div>';
+                return;
+            }
+            
+            // Lọc bỏ các câu hỏi đã được chọn
+            const selectedIds = selectedQuestions.map(q => q.ma_cau_hoi);
+            filteredQuestions = filteredQuestions.filter(q => !selectedIds.includes(q.ma_cau_hoi));
+            
+            if (filteredQuestions.length === 0) {
+                container.innerHTML = '<div class="loading">Tất cả câu hỏi đã được chọn.</div>';
+                return;
+            }
+            
+            // Hiển thị các câu hỏi
+            filteredQuestions.forEach(question => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'available-question';
+                
+                questionItem.innerHTML = `
+                    <input type="checkbox" class="question-checkbox" value="${question.ma_cau_hoi}">
+                    <div>
+                        <div class="question-content">
+                            <strong>${question.noi_dung}</strong>
+                        </div>
+                        <div class="question-meta">
+                            Chương: ${question.chuong.ten_chuong} | 
+                            Loại: ${question.loai_cau_hoi === 'trac_nghiem' ? 'Trắc nghiệm' : 'Điền khuyết'}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(questionItem);
+            });
+        }
+        
+        // Thêm câu hỏi đã chọn
+        addSelectedQuestionsBtn.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Vui lòng chọn ít nhất một câu hỏi.');
+                return;
+            }
+            
+            // Lấy ID các câu hỏi đã chọn
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+            
+            // Tìm các câu hỏi tương ứng
+            let newQuestions = [];
+            Object.values(allAvailableQuestions).forEach(questions => {
+                questions.forEach(question => {
+                    if (selectedIds.includes(question.ma_cau_hoi)) {
+                        newQuestions.push(question);
+                    }
+                });
+            });
+            
+            // Thêm vào danh sách câu hỏi đã chọn
+            selectedQuestions = [...selectedQuestions, ...newQuestions];
+            
+            // Cập nhật hiển thị
+            updateSelectedQuestions();
+            
+            // Đóng modal
+            addQuestionModal.style.display = 'none';
         });
     });
 </script>
