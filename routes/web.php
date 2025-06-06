@@ -8,6 +8,7 @@ use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Route cho trang chính
@@ -81,6 +82,11 @@ Route::middleware('auth')->group(function () {
     // Route cho thống kê (chỉ admin và giáo viên)
     Route::middleware('role:quan_tri,giao_vien')->group(function () {
         Route::get('/statistics', [ResultController::class, 'statistics'])->name('results.statistics');
+    });
+    
+    // Route cho quản lý người dùng (chỉ admin)
+    Route::middleware('role:quan_tri')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', UserController::class);
     });
 
     // Route cho bài thi ngẫu nhiên

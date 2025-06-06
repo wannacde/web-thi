@@ -27,6 +27,11 @@
     
     <div class="dashboard-actions">
         <div class="action-card">
+            <h2>Quản lý người dùng</h2>
+            <p>Thêm, sửa, xóa người dùng</p>
+            <a href="{{ route('admin.users.index') }}" class="btn-primary"><i class="fas fa-users"></i>Quản lý người dùng</a>
+        </div>
+        <div class="action-card">
             <h2>Quản lý môn học</h2>
             <p>Thêm, sửa, xóa môn học và chương</p>
             <a href="{{ route('subjects.index') }}" class="btn-primary"><i class="fas fa-book"></i>Quản lý môn học</a>

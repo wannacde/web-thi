@@ -251,6 +251,7 @@
             @else
                 @if(Auth::user()->vai_tro == 'quan_tri')
                     <a href="{{ route('admin.dashboard') }}"><i class="fa fa-user-shield"></i>Dashboard</a>
+                    <a href="{{ route('admin.users.index') }}"><i class="fa fa-users"></i>Quản lý người dùng</a>
                 @elseif(Auth::user()->vai_tro == 'giao_vien')
                     <a href="{{ route('teacher.dashboard') }}"><i class="fa fa-chalkboard-teacher"></i>Dashboard</a>
                 @endif
